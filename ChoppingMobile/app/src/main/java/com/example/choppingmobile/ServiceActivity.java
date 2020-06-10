@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -29,7 +30,7 @@ public class ServiceActivity extends AppCompatActivity {
     private ServiceMain serviceMainFragment=null;
     private OpenMarket marketFragment=null;
     private UserPage userPageFragment=null;
-
+    private State currentState=null;
     enum State{
         Community, OpenMarket,User, mainPage
     };
@@ -67,6 +68,7 @@ public class ServiceActivity extends AppCompatActivity {
         init();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.serviceMainLayout,serviceMainFragment).commit();
+        currentState=State.mainPage;
         userPageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,14 +90,25 @@ public class ServiceActivity extends AppCompatActivity {
             }
         });
     }
-
+    public void setVolatileScreen(Fragment fragment)
+    {
+        FragmentTransaction transaction= getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.serviceMainLayout,fragment);
+        transaction.addToBackStack(null);
+    }
     public void setScreen(State state)
     {
+        Log.e("fragment",state.toString());
         getSupportFragmentManager().popBackStack(state.toString(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        Fragment fragment = pageList.get(state);
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        if(fragment!=null)
-            transaction.replace(R.id.serviceMainLayout,fragment).commit();
-        transaction.addToBackStack(state.toString());
+        if(currentState!=state){
+            Fragment fragment = pageList.get(state);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            if(fragment!=null){
+                Log.e("fragment","Change");
+                transaction.addToBackStack(currentState.toString());
+                transaction.replace(R.id.serviceMainLayout,fragment).commit();
+                currentState=state;
+            }
+        }
     }
 }
