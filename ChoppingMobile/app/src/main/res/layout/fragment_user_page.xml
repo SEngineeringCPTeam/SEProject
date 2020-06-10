@@ -11,8 +11,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:weightSum="6"
         android:background="#0FFF9F">
+        <LinearLayout
+            android:id="@+id/userTapLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical"
+            android:background="#FFFFFF"
+            android:layout_margin="10dp">
+            <TableLayout
+                android:id="@+id/userDataTable"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
+            </TableLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            android:weightSum="5"
+            android:id="@+id/relateProductLayout"
+            android:orientation="vertical"
+            android:background="#FFFFFF">
+
+        </LinearLayout>
     </LinearLayout>
-
 </FrameLayout>
