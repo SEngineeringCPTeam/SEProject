@@ -5,32 +5,42 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
     public static MainActivity mainActivity;
     public FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     public FirebaseFirestore db = FirebaseFirestore.getInstance();
     public DatabaseReference databaseReference = firebaseDatabase.getReference();
 
+
+    public static int galleryCode = 102;
     HashMap<String, Object> childUpdates = null;
     Map<String, Object> userValue = null;
     User user;
     Info info;
+    public Assign assign;
     Button getMessage;
     LoginFragment loginScreen;
     SignupFragment signupScreen;
@@ -41,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private void init()
     {
         mainActivity =this;
+        assign=new Assign();
         loginScreen=new LoginFragment();
         signupScreen=new SignupFragment();
     }
@@ -92,6 +103,31 @@ public class MainActivity extends AppCompatActivity {
         }
         return map;
     }
+
+    public void UploadBitmap(Bitmap bitmap)
+    {
+
+
+    }
+
+    public void getUserData(final ICallbackTask callback)
+    {
+        User u = new User();
+        if(assign!=null)
+        {
+            Query userDate=db.collection("User").whereEqualTo("id",assign.id);
+            userDate.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    for (QueryDocumentSnapshot document:task.getResult())
+                    {
+                        callback.GetData(document.getData());
+                    }
+                }
+            });
+        }
+    }
+
     public void setScreen(Screen screen)
     {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

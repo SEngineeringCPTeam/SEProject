@@ -13,32 +13,18 @@
         android:orientation="vertical"
         android:weightSum="12"
         android:background="#F9FF0F">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:id="@+id/makePostSubmitLayout"
-            android:background="#00FF00"
-            android:orientation="vertical">
-            <Button
-                android:layout_margin="5dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Submit"
-                android:layout_gravity="right"
-                android:id="@+id/postSubmitBtn"/>
-        </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="11"
-            android:weightSum="7"
+            android:weightSum="8"
             android:orientation="vertical"
             android:id="@+id/makePostMainLayout">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_weight="1.5"
                 android:orientation="vertical"
                 android:id="@+id/makePostTitleLayout">
                 <EditText
@@ -53,10 +39,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     >
-                    <EditText
-                        android:layout_width="200dp"
+                    <Spinner
+                        android:layout_width="300dp"
                         android:layout_height="wrap_content"
-                        android:id="@+id/categoryEdit"
+                        android:id="@+id/categorySpinner"
+                        android:layout_marginTop="10dp"
                         android:hint="Category"
                         />
                     <Button
@@ -71,7 +58,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="6"
+                android:layout_weight="6.5"
                 android:orientation="vertical"
                 android:id="@+id/makePostContentLayout"
                 android:background="#FFFFFF"
@@ -87,21 +74,35 @@
                         android:orientation="vertical"
                         >
 
-                        <ImageView
-                            android:id="@+id/postImage"
-                            android:layout_width="match_parent"
+                        <androidx.viewpager.widget.ViewPager
+                            android:layout_width="400dp"
                             android:layout_height="400dp"
-                            android:src="@drawable/defaultimg"
-                            android:layout_marginTop="20dp"/>
+                            android:id="@+id/makePostViewPager"
+                            />
 
                         <EditText
                         android:id="@+id/postContent"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         />
                     </LinearLayout>
                 </ScrollView>
             </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/makePostSubmitLayout"
+            android:background="#00FF00"
+            android:orientation="vertical">
+            <Button
+                android:layout_margin="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Submit"
+                android:layout_gravity="right"
+                android:id="@+id/postSubmitBtn"/>
         </LinearLayout>
     </LinearLayout>
 

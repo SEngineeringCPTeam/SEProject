@@ -4,20 +4,20 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
-import java.util.Map;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link UserPage#newInstance} factory method to
+ * Use the {@link PostFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class UserPage extends Fragment implements ICallbackTask{
+public class PostFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -27,7 +27,7 @@ public class UserPage extends Fragment implements ICallbackTask{
     private String mParam1;
     private String mParam2;
 
-    public UserPage() {
+    public PostFragment() {
         // Required empty public constructor
     }
 
@@ -37,17 +37,23 @@ public class UserPage extends Fragment implements ICallbackTask{
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment UserPage.
+     * @return A new instance of fragment PostFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static UserPage newInstance(String param1, String param2) {
-        UserPage fragment = new UserPage();
+    public static PostFragment newInstance(String param1, String param2) {
+        PostFragment fragment = new PostFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
+
+    MainActivity mainActivity=null;
+    FirebaseFirestore db=null;
+    Post currentPost=null;
+    ListView commentList=null;
+    ListView imageSlider=null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,24 +62,28 @@ public class UserPage extends Fragment implements ICallbackTask{
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
     }
 
-    private User u;
+    private void init()
+    {
+        mainActivity = MainActivity.mainActivity;
+        db = mainActivity.db;
+        currentPost=new Post();
+    }
+
+    private void initWidget(ViewGroup vg)
+    {
+
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        u=new User();
-        MainActivity.mainActivity.getUserData(this);
-        return inflater.inflate(R.layout.fragment_user_page, container, false);
-
+        return inflater.inflate(R.layout.fragment_post, container, false);
     }
 
-    @Override
-    public void GetData(Map<String, Object> data) {
-        Log.e("getData",data.toString());
-        u.setUser(data);
-        Log.e("theResult",u.password);
+    public void getImageFromDB()
+    {
+
     }
 }
