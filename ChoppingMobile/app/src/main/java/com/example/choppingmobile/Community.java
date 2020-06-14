@@ -1,12 +1,21 @@
 package com.example.choppingmobile;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.Button;
+
+import java.util.ArrayList;
 
 
 /**
@@ -37,6 +46,8 @@ public class Community extends Fragment {
      * @return A new instance of fragment Community.
      */
     // TODO: Rename and change types and number of parameters
+    ViewPager viewPager;
+
     public static Community newInstance(String param1, String param2) {
         Community fragment = new Community();
         Bundle args = new Bundle();
@@ -55,10 +66,46 @@ public class Community extends Fragment {
         }
     }
 
+    ServiceActivity parentActivity;
+
+    Button makePostBtn;
+    ViewPager test;
+    private void init(ViewGroup vg)
+    {
+        parentActivity=(ServiceActivity) getActivity();
+    }
+    private void init_widget(ViewGroup vg)
+    {
+        makePostBtn=vg.findViewById(R.id.communityMakePostBtn);
+        viewPager=vg.findViewById(R.id.viewPager);
+    }
+    Bitmap img1;
+    ImageAdapter adapter;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_community, container, false);
+        ViewGroup vg =  (ViewGroup) inflater.inflate(R.layout.fragment_community, container, false);
+        init(vg);
+        init_widget(vg);
+        makePostBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                parentActivity.setVolatileScreen(new MakePostFragment());
+            }
+        });
+        ArrayList<Bitmap> images = new ArrayList<>();
+        Drawable temp = getResources().getDrawable(R.drawable.face);
+        img1 = ((BitmapDrawable)temp).getBitmap();
+        //images.add(img1);
+        //Drawable temp2 = getResources().getDrawable(R.drawable.defaultimg);
+        //Bitmap img2 = ((BitmapDrawable)temp2).getBitmap();
+        //images.add(img2);
+
+
+        adapter=new ImageAdapter(getContext(),images);
+        viewPager.setAdapter(adapter);
+
+        return vg;
     }
 }

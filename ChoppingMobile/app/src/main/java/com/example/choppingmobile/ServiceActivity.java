@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.Button;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
 public class ServiceActivity extends AppCompatActivity {
@@ -22,6 +24,7 @@ public class ServiceActivity extends AppCompatActivity {
     private Query dataQuery=null;
     private HashMap<State, Fragment> pageList=null;
 
+    public Bitmap defaultBitmap=null;
 
     private Button marketBtn;
     private Button communityBtn;
@@ -93,8 +96,8 @@ public class ServiceActivity extends AppCompatActivity {
     public void setVolatileScreen(Fragment fragment)
     {
         FragmentTransaction transaction= getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.serviceMainLayout,fragment);
-        transaction.addToBackStack(null);
+        transaction.replace(R.id.serviceMainLayout,fragment).commit();
+        transaction.addToBackStack(currentState.toString());
     }
     public void setScreen(State state)
     {
@@ -110,5 +113,26 @@ public class ServiceActivity extends AppCompatActivity {
                 currentState=state;
             }
         }
+    }
+    public void setDefaultBitmap(Bitmap b)
+    {
+        defaultBitmap=b;
+    }
+
+    public void getBitmapFromStorage(String url)
+    {
+
+    }
+
+    public void uploadBitmapToStorage(Bitmap bitmap)
+    {
+        String url ="";
+        String date = getDate().toString();
+    }
+
+    public SimpleDateFormat getDate()
+    {
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+        return format;
     }
 }

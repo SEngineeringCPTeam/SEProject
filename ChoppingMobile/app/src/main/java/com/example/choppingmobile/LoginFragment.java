@@ -77,6 +77,7 @@ public class LoginFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
+    MainActivity mainActivity;
     private Button signUpBtn;
     private Button loginBtn;
     private Query getID;
@@ -87,6 +88,7 @@ public class LoginFragment extends Fragment {
     String inputData;
     private void init(ViewGroup vg)
     {
+        mainActivity=MainActivity.mainActivity;
         signUpBtn=vg.findViewById(R.id.signUpBtn);
         loginBtn=vg.findViewById(R.id.loginBtn);
         idEdit=vg.findViewById(R.id.idEdit);
@@ -121,6 +123,7 @@ public class LoginFragment extends Fragment {
                                             if(document.getData().get("password").toString().equals(pwEdit.getText().toString()))//loginSuccess
                                             {
                                                 Toast.makeText(getContext(),"Login Success",Toast.LENGTH_SHORT).show();
+                                                mainActivity.assign.setId(inputData);
                                                 Intent intent = new Intent(getActivity(), ServiceActivity.class);
                                                 startActivity(intent);
                                             }
