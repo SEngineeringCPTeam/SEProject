@@ -1,31 +1,50 @@
 package com.example.choppingmobile;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 public class ServiceActivity extends AppCompatActivity {
 
     public static ServiceActivity serviceActivity=null;
+    public static String imgPath="ImageCollection/";
+
     public FirebaseFirestore db=null;
     private Query dataQuery=null;
     private HashMap<State, Fragment> pageList=null;
 
+    public StorageReference mStorageRef;
+
+
     public Bitmap defaultBitmap=null;
 
+    private MainActivity mainActivity;
     private Button marketBtn;
     private Button communityBtn;
     private Button userPageBtn;
@@ -58,8 +77,11 @@ public class ServiceActivity extends AppCompatActivity {
     private void init()
     {
         serviceActivity=this;
+        mainActivity=MainActivity.mainActivity;
         db=FirebaseFirestore.getInstance();
         pageList= new HashMap<>();
+
+        mStorageRef = FirebaseStorage.getInstance().getReference();
         initPages();
         initBtn();
     }
@@ -68,6 +90,7 @@ public class ServiceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_service);
+        Log.e("url",ServerValue.TIMESTAMP.get(".sv"));
         init();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.serviceMainLayout,serviceMainFragment).commit();
@@ -123,16 +146,51 @@ public class ServiceActivity extends AppCompatActivity {
     {
 
     }
-
-    public void uploadBitmapToStorage(Bitmap bitmap)
+    public void uploadUriToStorage(final IGetData iGetData,Uri uri)
     {
-        String url ="";
-        String date = getDate().toString();
+        final StorageReference ref= mStorageRef.child(imgPath+uri.getLastPathSegment());
+        UploadTask uploadTask = ref.putFile(uri);
+
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("Theuri","TaskFailure");
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                iGetData.getUri(imgPath+taskSnapshot.getMetadata().getName());
+                Log.e("Theuri",taskSnapshot.getMetadata().getName());
+            }
+        });
+    }
+    //current Not used
+    public void uploadBitmapToStorageByte(Bitmap bitmap)
+    {
+        bitmap = Bitmap.createScaledBitmap(bitmap,300,300,true);
+        String img_url ="";
+        img_url = imgPath+getDate()+mainActivity.assign.id;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG,100,baos);
+        byte[] data = baos.toByteArray();
+        UploadTask uploadTask = mStorageRef.child(img_url).putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","imageUploadFailure");
+            }
+        }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+
+                }
+            });
     }
 
-    public SimpleDateFormat getDate()
+    public String getDate()
     {
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-        return format;
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
+        return format.format(new Date());
     }
 }
