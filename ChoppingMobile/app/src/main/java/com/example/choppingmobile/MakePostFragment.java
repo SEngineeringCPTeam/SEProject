@@ -3,6 +3,7 @@ package com.example.choppingmobile;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -25,14 +26,12 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,6 +88,7 @@ public class MakePostFragment extends Fragment implements IGetData{
     private Button galleryBtn;
     private Button submitBtn;
     private MainActivity mainActivity;
+    private ServiceActivity serviceActivity;
     private FirebaseFirestore db;
     private ViewPager viewPager;
     private ArrayList<Bitmap> bitmapList;
@@ -98,6 +98,7 @@ public class MakePostFragment extends Fragment implements IGetData{
     private void init()
     {
         mainActivity=MainActivity.mainActivity;
+        serviceActivity=ServiceActivity.serviceActivity;
         db=mainActivity.db;
         bitmapList=new ArrayList<>();
         adapter=new ImageAdapter(getContext(),bitmapList);
@@ -201,17 +202,26 @@ public class MakePostFragment extends Fragment implements IGetData{
     }
 
     @Override
+    public void getUri(String url) {
+        Log.e("Theuri",url);
+        //string으로 받은 url을 저장, post화
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode==MainActivity.galleryCode)
         {
             if(resultCode==-1) {
+                Uri imageUri = data.getData();
                 try {
                     InputStream in = getContext().getContentResolver().openInputStream(data.getData());
                     Bitmap img = BitmapFactory.decodeStream(in);
                     in.close();
                     adapter.appendBitmap(img);
+                    serviceActivity.uploadUriToStorage(this,imageUri);
+                    //serviceActivity.uploadBitmapToStorageByte(img);
                     Log.e("exception_h",Integer.toString(viewPager.getHeight()));
                     Log.e("exception_n",Integer.toString(adapter.getCount()));
                     Log.e("exception",Integer.toString(img.getHeight()));
