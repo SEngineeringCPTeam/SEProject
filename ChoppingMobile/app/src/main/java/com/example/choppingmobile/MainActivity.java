@@ -16,15 +16,20 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.ServerTimestamp;
+import com.google.firebase.firestore.model.value.TimestampValue;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +38,6 @@ public class MainActivity extends AppCompatActivity{
     public FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     public FirebaseFirestore db = FirebaseFirestore.getInstance();
     public DatabaseReference databaseReference = firebaseDatabase.getReference();
-
 
     public static int galleryCode = 102;
     HashMap<String, Object> childUpdates = null;
@@ -62,7 +66,6 @@ public class MainActivity extends AppCompatActivity{
         init();
         FragmentTransaction transaction= getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.fragmentLayout, loginScreen).commit();
-
         Button sendBtn = findViewById(R.id.messageBtn);
         getMessage = findViewById(R.id.searchBtn);
         childUpdates=new HashMap<>();
@@ -141,4 +144,5 @@ public class MainActivity extends AppCompatActivity{
         if(screen!=Screen.Login)
             transaction.addToBackStack(null);
     }
+
 }

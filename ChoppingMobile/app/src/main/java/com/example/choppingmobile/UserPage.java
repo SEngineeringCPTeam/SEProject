@@ -76,4 +76,9 @@ public class UserPage extends Fragment implements ICallbackTask{
         u.setUser(data);
         Log.e("theResult",u.password);
     }
+
+    @Override
+    public void GetData(Object obj) {
+        //null
+    }
 }

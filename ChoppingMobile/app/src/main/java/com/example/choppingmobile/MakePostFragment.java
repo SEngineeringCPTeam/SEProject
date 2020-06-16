@@ -24,12 +24,16 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.ServerTimestamp;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -91,19 +95,24 @@ public class MakePostFragment extends Fragment implements IGetData{
     private ServiceActivity serviceActivity;
     private FirebaseFirestore db;
     private ViewPager viewPager;
-    private ArrayList<Bitmap> bitmapList;
+    private ArrayList<Uri> tempImageList;
     private ArrayList<String> category;
     private ImageAdapter adapter;
     private ArrayAdapter categoryAdapter;
+    private CommentField currentPostCommentField;
+    private Post postInstance =null;
     private void init()
     {
         mainActivity=MainActivity.mainActivity;
         serviceActivity=ServiceActivity.serviceActivity;
         db=mainActivity.db;
-        bitmapList=new ArrayList<>();
-        adapter=new ImageAdapter(getContext(),bitmapList);
+        tempImageList=new ArrayList<>();
+        adapter=new ImageAdapter(getContext(),tempImageList);
         category=new ArrayList<>();
+        currentPostCommentField=new CommentField();
         getCategoryListFromDB();
+
+        postInstance = new Post();
     }
 
     private void initWidget(ViewGroup vg)
@@ -120,17 +129,10 @@ public class MakePostFragment extends Fragment implements IGetData{
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         ViewGroup vg = (ViewGroup) inflater.inflate(R.layout.fragment_make_post, container, false);
-
         initWidget(vg);
-        Log.e("categoryData",category.toString());
+
 
         viewPager.setAdapter(adapter);
-
-        if(validation())
-            Log.e("validation","valid");
-        else
-            Log.e("validation","not valid");
-
         galleryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -142,12 +144,14 @@ public class MakePostFragment extends Fragment implements IGetData{
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                makePost();
+                if(formatValid()) {
+                    makePost();
+                }
             }
         });
         return vg;
     }
-    public boolean validation()
+    public boolean formatValid()
     {
         if(titleEdit.getText().length()==0)
             return false;
@@ -155,10 +159,36 @@ public class MakePostFragment extends Fragment implements IGetData{
             return false;
         return true;
     }
+    public boolean validation()
+    {
+        if(postInstance.urlList.size()<adapter.getImages().size())
+            return false;
+        if(postInstance.commentId.equals("null"))
+            return false;
+        return true;
+    }
     public void makePost()
     {
-        Post post = new Post(titleEdit.getText().toString(),contentEdit.getText().toString(),"qwertq");
-        db.collection("Post").add(post).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+        postInstance.title=titleEdit.getText().toString();
+        postInstance.content=contentEdit.getText().toString();
+        postInstance.time = FieldValue.serverTimestamp();
+        postInstance.category=categorySpinner.getSelectedItem().toString();
+
+        ArrayList<Uri> images = adapter.getImages();
+
+        makeCommentField();
+        for(int i=0;i<images.size();i++)
+        {
+            serviceActivity.uploadUriToStorage(this, images.get(i));
+        }
+        ValidThread thread = new ValidThread(200);
+        thread.isDaemon();
+        thread.start();
+    }
+
+    public void submitPost()
+    {
+        db.collection("Post").add(postInstance).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
             @Override
             public void onComplete(@NonNull Task<DocumentReference> task) {
                 Toast.makeText(getContext(),"Post가 등록되었습니다.",Toast.LENGTH_SHORT).show();
@@ -167,6 +197,24 @@ public class MakePostFragment extends Fragment implements IGetData{
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(getContext(),"Error: Post가 등록되지 않았습니다.",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void makeCommentField()
+    {
+        currentPostCommentField.writerId=mainActivity.assign.id;
+        db.collection("CommentList").add(currentPostCommentField)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        String id = documentReference.getId();
+                        postInstance.setCommentId(id);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","Comment Field Compose Failure");
             }
         });
     }
@@ -198,6 +246,8 @@ public class MakePostFragment extends Fragment implements IGetData{
             categoryAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_dropdown_item,category);
             categorySpinner.setAdapter(categoryAdapter);
             Log.e("categoryLength",Integer.toString(category.size()));
+        }else if(id.equals("commentId")){
+            Log.e("commentId",data.toString());
         }
     }
 
@@ -205,6 +255,9 @@ public class MakePostFragment extends Fragment implements IGetData{
     public void getUri(String url) {
         Log.e("Theuri",url);
         //string으로 받은 url을 저장, post화
+        postInstance.urlList.add(url);
+        Log.e("url",url);
+        Log.e("url",Integer.toString(postInstance.urlList.size()));
     }
 
     @Override
@@ -216,21 +269,35 @@ public class MakePostFragment extends Fragment implements IGetData{
             if(resultCode==-1) {
                 Uri imageUri = data.getData();
                 try {
-                    InputStream in = getContext().getContentResolver().openInputStream(data.getData());
-                    Bitmap img = BitmapFactory.decodeStream(in);
-                    in.close();
-                    adapter.appendBitmap(img);
-                    serviceActivity.uploadUriToStorage(this,imageUri);
-                    //serviceActivity.uploadBitmapToStorageByte(img);
-                    Log.e("exception_h",Integer.toString(viewPager.getHeight()));
-                    Log.e("exception_n",Integer.toString(adapter.getCount()));
-                    Log.e("exception",Integer.toString(img.getHeight()));
+                    adapter.appendBitmap(imageUri);
+                    //serviceActivity.uploadUriToStorage(this,imageUri);
                 } catch (Exception ex)
                 {
                     Log.e("exception",ex.toString());
                 }
-
             }
         }
     }
-}
+    public class ValidThread extends Thread
+    {
+        int time;
+        public ValidThread(int t)
+        {
+            t=time;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            try {
+                    while(!validation())
+                    {
+                        sleep(time);
+                    }
+                    submitPost();
+            }catch (Exception ex)
+            {
+                Log.e("testing","exception");
+            }
+        }
+    }}

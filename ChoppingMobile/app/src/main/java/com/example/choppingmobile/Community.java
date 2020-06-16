@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -94,17 +95,6 @@ public class Community extends Fragment {
                 parentActivity.setVolatileScreen(new MakePostFragment());
             }
         });
-        ArrayList<Bitmap> images = new ArrayList<>();
-        Drawable temp = getResources().getDrawable(R.drawable.face);
-        img1 = ((BitmapDrawable)temp).getBitmap();
-        //images.add(img1);
-        //Drawable temp2 = getResources().getDrawable(R.drawable.defaultimg);
-        //Bitmap img2 = ((BitmapDrawable)temp2).getBitmap();
-        //images.add(img2);
-
-
-        adapter=new ImageAdapter(getContext(),images);
-        viewPager.setAdapter(adapter);
 
         return vg;
     }
