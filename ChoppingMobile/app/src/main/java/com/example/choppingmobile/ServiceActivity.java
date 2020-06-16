@@ -142,9 +142,19 @@ public class ServiceActivity extends AppCompatActivity {
         defaultBitmap=b;
     }
 
-    public void getBitmapFromStorage(String url)
+    public void getBitmapFromStorage(String url, final ICallbackTask callbackTask)
     {
-
+        mStorageRef.child(url).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                callbackTask.GetData(uri);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","Image Loading Failure");
+            }
+        });
     }
     public void uploadUriToStorage(final IGetData iGetData,Uri uri)
     {

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#FF7979"
+        >
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+            android:id="@+id/itemImg"
+            android:background="#FFFFFF"
+        />
+        <LinearLayout
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="30dp"
+                android:text="Title"
+                android:textStyle="bold"
+                android:id="@+id/titleText"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="40dp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/writerText"
+                android:textSize="20dp"
+                android:text="Writer"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="60dp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/costText"
+                android:textSize="20dp"
+                android:text="Cost"
+                android:textStyle="bold"
+                android:layout_marginLeft="60dp"
+                />
+        </LinearLayout>
+    </LinearLayout>>
+</LinearLayout>

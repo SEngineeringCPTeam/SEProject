@@ -2,6 +2,8 @@ package com.example.choppingmobile;
 
 import android.widget.LinearLayout;
 
+import com.google.firebase.firestore.FieldValue;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,16 +13,18 @@ public class Post implements IDatabaseObject{
     public String title;
     public String content;
     public String writer;
+    public String category;
     public ArrayList<String> urlList;
     public String commentId;
+    public FieldValue time;
 
     public Post(String _title, String con, String _commentId)
     {
         title=_title;
         content=con;
+        category="null";
         commentId=_commentId;
         urlList=new ArrayList<>();
-        urlList.add("test");
         writer=MainActivity.mainActivity.assign.id;
     }
 
@@ -28,8 +32,15 @@ public class Post implements IDatabaseObject{
     {
         title="Null Title";
         content="Empty";
-        commentId="NULL";
+        commentId="null";
+        category="null";
         writer=MainActivity.mainActivity.assign.id;
+        urlList=new ArrayList<>();
+    }
+
+    public void setCommentId(String cid)
+    {
+        commentId = cid;
     }
 
     @Override
@@ -42,6 +53,7 @@ public class Post implements IDatabaseObject{
     {
         title = (String) map.get("title");
         content = (String)map.get("content");
+        category=(String)map.get("category");
         urlList = (ArrayList<String>) map.get("urlList");
     }
 }

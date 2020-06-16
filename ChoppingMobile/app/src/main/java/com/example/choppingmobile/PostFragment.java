@@ -11,13 +11,15 @@ import android.widget.ListView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Map;
+
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link PostFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PostFragment extends Fragment {
+public class PostFragment extends Fragment implements ICallbackTask{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -84,6 +86,17 @@ public class PostFragment extends Fragment {
 
     public void getImageFromDB()
     {
+
+    }
+
+    @Override
+    public void GetData(Map<String, Object> data) {
+
+    }
+
+    @Override
+    public void GetData(Object obj) {
+        //비트맵을 받는 Task
 
     }
 }
