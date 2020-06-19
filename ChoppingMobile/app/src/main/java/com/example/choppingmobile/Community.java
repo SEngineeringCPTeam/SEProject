@@ -1,10 +1,5 @@
 package com.example.choppingmobile;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,14 +10,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -84,10 +83,18 @@ public class Community extends Fragment {
     FirebaseFirestore db;
     Query postQuery;
     Button makePostBtn;
-    RequestOptions requestOptions;
-    ViewPager test;
+    RequestOptions requestOptions;//;glide option
+
+    Spinner searchOptSpinner;
+    ArrayAdapter searchOptAdapter;
+
+    EditText searchEdit;
+    Button searchBtn;
+
     ListView listView;
     ListAdapter imgAdapter;
+
+    ArrayList<String> categoryList;
     private void init(ViewGroup vg)
     {
         parentActivity=(ServiceActivity) getActivity();
@@ -99,6 +106,11 @@ public class Community extends Fragment {
                 .placeholder(R.drawable.defaultimg)
                 .error(R.drawable.defaultimg);
         imgAdapter = new ListAdapter(getContext(),false);
+
+        searchOptSpinner = vg.findViewById(R.id.searchOptSpinner);
+        categoryList = new ArrayList<>();
+        searchOptAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_dropdown_item,categoryList);
+        searchOptSpinner.setAdapter(searchOptAdapter);
     }
     private void init_widget(ViewGroup vg)
     {
@@ -106,8 +118,7 @@ public class Community extends Fragment {
         makePostBtn=vg.findViewById(R.id.communityMakePostBtn);
         viewPager=vg.findViewById(R.id.viewPager);
     }
-    Bitmap img1;
-    ImageAdapter adapter;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -115,6 +126,7 @@ public class Community extends Fragment {
         ViewGroup vg =  (ViewGroup) inflater.inflate(R.layout.fragment_community, container, false);
         init(vg);
         init_widget(vg);
+        getCategoryList();
         listView.setAdapter(imgAdapter);
 
         makePostBtn.setOnClickListener(new View.OnClickListener() {
@@ -130,6 +142,28 @@ public class Community extends Fragment {
     {
 
     }
+
+    public void getCategoryList()
+    {
+        DocumentReference query = db.collection("Category").document("searchOption");
+        query.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                Log.e("result",documentSnapshot.get("category").toString());
+                categoryList = (ArrayList<String>) documentSnapshot.get("category");
+                Log.e("result",Integer.toString(categoryList.size()));
+                searchOptAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_dropdown_item,categoryList);
+                searchOptSpinner.setAdapter(searchOptAdapter);
+                searchOptAdapter.notifyDataSetChanged();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","Load Category Failure");
+            }
+        });
+    }
+
     public void getPostList()
     {
         postQuery.orderBy("time", Query.Direction.DESCENDING)
@@ -142,7 +176,7 @@ public class Community extends Fragment {
                             Map<String, Object> data = task.getData();
                             Log.e("testing",data.get("title").toString());
                             PostItem temp = new PostItem();
-                            //이미지 받아오기
+                            ArrayList<String> previewURL = (ArrayList<String>) data.get("urlList");
                             temp.setId(task.getId());
                             temp.writer = data.get("writer").toString();
                             temp.title = data.get("title").toString();

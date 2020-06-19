@@ -222,13 +222,12 @@ public class MakePostFragment extends Fragment implements IGetData{
     public void getCategoryListFromDB()
     {
         Query categoryQuery = db.collection("Category").whereEqualTo("name","productCategory");
-        Log.e("category","startQuery");
         categoryQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 for (QueryDocumentSnapshot document:task.getResult())
                 {
-                    getData("category",new ArrayList<String>((List)document.get("productCategory")));
+                    getData("category",new ArrayList<String>((List)document.get("category")));
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -239,6 +238,8 @@ public class MakePostFragment extends Fragment implements IGetData{
         });
     }
 
+    //아이템을 받고 처리하는 part.
+    //id로 Action 구분.
     @Override
     public void getData(String id, Object data) {
         if(id.equals("category")){

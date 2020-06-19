@@ -13,6 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,14 +27,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link SignupFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class SignupFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -69,16 +69,23 @@ public class SignupFragment extends Fragment {
     private EditText pwEdit;
     private EditText confirmPwEdit;
     private EditText nameEdit;
-    private EditText genderEdit;
+
     private EditText phoneEdit;
     private EditText birthEdit;
     private EditText addrEdit;
 
     private TextView duplicateText;
+    private TextView genderText;
+
+    private String afterFormatDate;
+    private String gender;
+
 
     private ArrayList<EditText> editLsit;
     private Button duplicateBtn;
     private Button submitBtn;
+
+    private RadioGroup genderRadioGroup;
 
     private User user;
 
@@ -97,8 +104,7 @@ public class SignupFragment extends Fragment {
         editLsit.add(confirmPwEdit);
         nameEdit=vg.findViewById(R.id.nameEdit);
         editLsit.add(nameEdit);
-        genderEdit=vg.findViewById(R.id.genderEdit);
-        editLsit.add(genderEdit);
+
         phoneEdit = vg.findViewById(R.id.phoneNumberEdit);
         editLsit.add(phoneEdit);
         birthEdit=vg.findViewById(R.id.birthDayEdit);
@@ -107,6 +113,9 @@ public class SignupFragment extends Fragment {
         editLsit.add(addrEdit);
 
         duplicateText=vg.findViewById(R.id.duplicateText);
+        genderText = vg.findViewById(R.id.genderText);
+        genderRadioGroup = vg.findViewById(R.id.gender_radiogroup);
+
 
         db=MainActivity.mainActivity.db;
         userQuery = db.collection("User");
@@ -170,6 +179,26 @@ public class SignupFragment extends Fragment {
                         });
             }
         });
+
+        // 라디오버튼 클릭 리스너
+        RadioGroup radioGroup = (RadioGroup) viewGroup .findViewById(R.id.gender_radiogroup);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                // checkedId is the RadioButton selected
+                switch(checkedId) {
+                    case R.id.male:
+                        Toast.makeText(getContext(),"성별 : 남자",Toast.LENGTH_SHORT).show();
+                        gender = "Male";
+                        break;
+                    case R.id.female:
+                        Toast.makeText(getContext(),"성별 : 여자",Toast.LENGTH_SHORT).show();
+                        gender = "Female";
+                        break;
+                }
+            }
+        });
+
         return viewGroup;
     }
     private boolean validation()//id, 비밀번호 복잡성, 생일 -> DateType으로, phone number형식 맞춰야함.
@@ -195,13 +224,66 @@ public class SignupFragment extends Fragment {
             return false;
         }
 
+        // 비밀번호 복잡성
+        if(pwEdit.length() <= 7) {
+            Toast.makeText(getContext(),"비밀번호는 8자리 이상이여야 합니다.",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        // 생년월일 Date 타입
+        if(!birthEdit.getText().toString().equals("")){
+            String birthday = birthEdit.getText().toString();
+            if(birthday.length()!="yyyymmdd".length())
+            {
+                Toast.makeText(getContext(),"올바른 생년월일을 입력해주세요.",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            int date;
+            try{
+                date = Integer.parseInt(birthday);
+            }catch (NumberFormatException e)
+            {
+                Toast.makeText(getContext(),"올바른 생년월일을 입력해주세요.",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            int year = date /10000;
+            int month = (date%10000)/100;
+            int day = date % 100;
+
+            if(year<1800) {
+                Toast.makeText(getContext(),"올바른 생년월일을 입력해주세요.",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            if(month>12||month<0) {
+                Toast.makeText(getContext(),"올바른 생년월일을 입력해주세요.",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            if(day>31||day<0) {
+                Toast.makeText(getContext(),"올바른 생년월일을 입력해주세요.",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+        else {
+            Toast.makeText(getContext(),"생년월일을 입력해주세요.",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        // 핸드폰 번호 형식
+        if(phoneEdit.length() != 11) {
+            Toast.makeText(getContext(),"전화번호를 확인해주세요.",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (genderRadioGroup.getCheckedRadioButtonId()==-1) {
+            Toast.makeText(getContext(), "성별을 입력해주세요.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
         return true;
     }
     private User composeUserData()
     {
         String name=nameEdit.getText().toString();
-        String gender = genderEdit.getText().toString();
-        String birthday=birthEdit.getText().toString();
+
+        //String birthday=birthEdit.getText().toString();
+        String birthday = birthEdit.getText().toString();
         String phoneNum=phoneEdit.getText().toString();
         String address=addrEdit.getText().toString();
         String id = idEdit.getText().toString();

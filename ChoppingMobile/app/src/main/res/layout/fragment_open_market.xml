@@ -16,15 +16,35 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="1.5"
             android:orientation="horizontal"
             android:id="@+id/categoryLayout">
+            <Spinner
+                android:id="@+id/marketSearchOptSpinner"
+                android:layout_width="130dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                />
+            <EditText
+                android:id="@+id/marketSearchEdit"
+                android:layout_width="200dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:hint="Search..."
+                />
+            <Button
+                android:id="@+id/marketSearchBtn"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:text="검색"
+                />
         </LinearLayout>
         <LinearLayout
             android:id="@+id/openMarketBodyLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="11"
+            android:layout_weight="10.5"
             android:weightSum="10"
             android:orientation="vertical"
             android:background="#FFFFFF">
