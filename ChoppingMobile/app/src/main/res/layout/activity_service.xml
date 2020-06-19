@@ -15,7 +15,7 @@
             android:id="@+id/serviceWidgetLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="0.8"
             android:orientation="horizontal"
             android:background="#00FFAF">
             <Button
@@ -44,7 +44,7 @@
             android:id="@+id/serviceMainLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="6"
+            android:layout_weight="6.2"
             android:orientation="vertical">
         </LinearLayout>
     </LinearLayout>
