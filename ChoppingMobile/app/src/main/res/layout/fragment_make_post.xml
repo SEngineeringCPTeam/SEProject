@@ -75,9 +75,10 @@
                         >
 
                         <androidx.viewpager.widget.ViewPager
-                            android:layout_width="400dp"
-                            android:layout_height="400dp"
+                            android:layout_width="200dp"
+                            android:layout_height="200dp"
                             android:id="@+id/makePostViewPager"
+                            android:background="#AAAAAA"
                             />
 
                         <EditText
@@ -89,21 +90,31 @@
                 </ScrollView>
             </LinearLayout>
         </LinearLayout>
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:id="@+id/makePostSubmitLayout"
-            android:background="#00FF00"
-            android:orientation="vertical">
+            android:background="#00FF00">
+            <EditText
+                android:layout_alignParentLeft="true"
+                android:layout_width="200dp"
+                android:layout_height="match_parent"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:hint="가격을 입력하세요"
+                android:id="@+id/itemCost"
+                android:visibility="gone"
+                />
             <Button
+                android:layout_alignParentRight="true"
                 android:layout_margin="5dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Submit"
                 android:layout_gravity="right"
                 android:id="@+id/postSubmitBtn"/>
-        </LinearLayout>
+        </RelativeLayout>
     </LinearLayout>
 
 </FrameLayout>
