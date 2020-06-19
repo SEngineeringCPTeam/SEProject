@@ -1,6 +1,7 @@
 package com.example.choppingmobile;
 
 import android.graphics.Color;
+import android.location.LocationManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -205,14 +206,15 @@ public class SignupFragment extends Fragment {
         String address=addrEdit.getText().toString();
         String id = idEdit.getText().toString();
         String pw = pwEdit.getText().toString();
-        user.userInfo.setInfo(name,gender,birthday,phoneNum,address);
+        user.setInfo(name,gender,birthday,phoneNum,address);
         user.setUser(id, pw);
-
+        if(user.info!=null)
+            Log.e("testing",user.info.get("name"));
         return user;
     }
     private void signUp(User user)
     {
-        db.collection("User").add(user).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+        db.collection("User").add(user.toMap()).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
             @Override
             public void onComplete(@NonNull Task<DocumentReference> task) {
                 Toast.makeText(getContext(),"회원가입에 성공했습니다.",Toast.LENGTH_SHORT).show();

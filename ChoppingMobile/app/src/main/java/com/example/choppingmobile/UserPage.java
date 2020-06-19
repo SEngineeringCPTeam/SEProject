@@ -2,12 +2,22 @@ package com.example.choppingmobile;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Map;
 
@@ -48,7 +58,8 @@ public class UserPage extends Fragment implements ICallbackTask{
         fragment.setArguments(args);
         return fragment;
     }
-
+    ListAdapter itemAdapter;
+    ListAdapter postAdapter;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,29 +67,83 @@ public class UserPage extends Fragment implements ICallbackTask{
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+    }
+    private MainActivity mainActivity;
+    private User u;
+    private FirebaseFirestore db;
 
+    private TextView nameText;
+    private TextView idText;
+    private TextView authorityText;
+
+    private ListView postList;
+    private ListView itemList;
+
+    private void init()
+    {
+        u=new User();
+        mainActivity = MainActivity.mainActivity;
+        db = mainActivity.db;
     }
 
-    private User u;
+    private void initWidget(ViewGroup vg)
+    {
+        nameText = vg.findViewById(R.id.userPage_nameText);
+        idText = vg.findViewById(R.id.userPage_idText);
+        authorityText = vg.findViewById(R.id.userPage_authority);
+
+        postList = vg.findViewById(R.id.userPostView);
+        itemList = vg.findViewById(R.id.userItemView);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        u=new User();
+
         MainActivity.mainActivity.getUserData(this);
-        return inflater.inflate(R.layout.fragment_user_page, container, false);
-
+        ViewGroup vg = (ViewGroup) inflater.inflate(R.layout.fragment_user_page, container, false);
+        init();
+        initWidget(vg);
+        getUserData();
+        return vg;
     }
-
+    public void getUserData()
+    {
+        String id = mainActivity.assign.id;
+        Query userQuery = db.collection("User").whereEqualTo("id",id);
+        userQuery.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                for(QueryDocumentSnapshot task : queryDocumentSnapshots)
+                {
+                    Map<String, Object> userData=task.getData();
+                    GetData(userData);
+                    Log.e("task",task.getData().toString());
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","getUserData Failure");
+            }
+        });
+    }
     @Override
     public void GetData(Map<String, Object> data) {
-        Log.e("getData",data.toString());
         u.setUser(data);
-        Log.e("theResult",u.password);
+        setWidget(u);
     }
 
     @Override
     public void GetData(Object obj) {
         //null
+    }
+
+    public void setWidget(User _u)
+    {
+        nameText.setText("이름: "+_u.info.get("name"));
+        idText.setText("ID: "+_u.id);
+        authorityText.setText("권한: "+_u.authority);
     }
 }

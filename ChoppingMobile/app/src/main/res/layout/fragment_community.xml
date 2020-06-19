@@ -32,14 +32,45 @@
                 android:id="@+id/communityListLayout"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="9"
+                android:layout_weight="8"
                 android:orientation="vertical">
                 <androidx.viewpager.widget.ViewPager
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:id="@+id/viewPager"
                     />
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fillViewport="true"
+                    >
+                    <ListView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/communityBodyList"
+                        />
+                </ScrollView>
             </LinearLayout>
+            <RelativeLayout
+                android:id="@+id/communityToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/prev"
+                    android:layout_alignParentLeft="true"
+                    android:text="이전"
+                    />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:id="@+id/next"
+                    android:text="다음"
+                    />
+            </RelativeLayout>
             <RelativeLayout
                 android:id="@+id/communityTailLayout"
                 android:layout_width="match_parent"
@@ -53,7 +84,7 @@
                     android:layout_alignParentRight="true"
                     android:id="@+id/communityMakePostBtn"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:text="MakePost" />
             </RelativeLayout>
         </LinearLayout>
