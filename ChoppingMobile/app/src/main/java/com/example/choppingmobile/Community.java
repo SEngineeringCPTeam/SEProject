@@ -1,5 +1,9 @@
 package com.example.choppingmobile;
 
+import android.content.ContentResolver;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,13 +17,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,6 +34,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -78,7 +86,6 @@ public class Community extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-
     ServiceActivity parentActivity;
     FirebaseFirestore db;
     Query postQuery;
@@ -88,12 +95,17 @@ public class Community extends Fragment {
     Spinner searchOptSpinner;
     ArrayAdapter searchOptAdapter;
 
+    private int screenPostNum =5;
+
     EditText searchEdit;
     Button searchBtn;
-
+    Button prevBtn;
+    Button nextBtn;
+    Timestamp firstTimeStamp;
+    Timestamp lastTimeStamp;
     ListView listView;
     ListAdapter imgAdapter;
-
+    ArrayList<ImageView> listImgList;
     ArrayList<String> categoryList;
     private void init(ViewGroup vg)
     {
@@ -116,6 +128,8 @@ public class Community extends Fragment {
     {
         listView = vg.findViewById(R.id.communityBodyList);
         makePostBtn=vg.findViewById(R.id.communityMakePostBtn);
+        prevBtn = vg.findViewById(R.id.prevBtn);
+        nextBtn = vg.findViewById(R.id.nextBtn);
         viewPager=vg.findViewById(R.id.viewPager);
     }
 
@@ -136,11 +150,21 @@ public class Community extends Fragment {
             }
         });
         getPostList();
-        return vg;
-    }
-    public void loadImage(String url)
-    {
 
+        prevBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getPrevList();
+            }
+        });
+
+        nextBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getNextList();
+            }
+        });
+        return vg;
     }
 
     public void getCategoryList()
@@ -164,24 +188,67 @@ public class Community extends Fragment {
         });
     }
 
-    public void getPostList()
+    public void getPrevList()
     {
-        postQuery.orderBy("time", Query.Direction.DESCENDING)
+        Log.e("time",firstTimeStamp.toDate().toString());
+        postQuery.orderBy("time",Query.Direction.DESCENDING)
+                .whereGreaterThan("time",firstTimeStamp.toDate())
+                .limit(screenPostNum)
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        for(QueryDocumentSnapshot task : queryDocumentSnapshots)
+                        if(queryDocumentSnapshots.size()==0)
+                            Toast.makeText(getContext(),"맨 앞 페이지 입니다.",Toast.LENGTH_SHORT).show();
+                        else
                         {
-                            Map<String, Object> data = task.getData();
-                            Log.e("testing",data.get("title").toString());
-                            PostItem temp = new PostItem();
-                            ArrayList<String> previewURL = (ArrayList<String>) data.get("urlList");
-                            temp.setId(task.getId());
-                            temp.writer = data.get("writer").toString();
-                            temp.title = data.get("title").toString();
-                            imgAdapter.addItem(temp);
+                            Log.e("time",Integer.toString(queryDocumentSnapshots.size()));
+                            composeScreen(queryDocumentSnapshots);
                         }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception","Load PrevPage Failure");
+                    }
+                });
+    }
+
+    public void getNextList()
+    {
+        Log.e("time",lastTimeStamp.toDate().toString());
+        postQuery.orderBy("time",Query.Direction.DESCENDING)
+                .whereLessThan("time",lastTimeStamp.toDate())//whereLessThan("time",lastTimeStamp)
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if(queryDocumentSnapshots.size()==0)
+                            Toast.makeText(getContext(),"마지막 페이지 입니다.",Toast.LENGTH_SHORT).show();
+                        else
+                        {
+                            Log.e("time",Integer.toString(queryDocumentSnapshots.size()));
+                            composeScreen(queryDocumentSnapshots);
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","load nextPage failure");
+            }
+        });
+    }
+    public void getPostList()
+    {
+        postQuery.orderBy("time", Query.Direction.DESCENDING)
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        composeScreen(queryDocumentSnapshots);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -190,5 +257,48 @@ public class Community extends Fragment {
                         Log.e("exception","postLoading Failure");
                     }
                 });
+    }
+
+    public void composeScreen(QuerySnapshot queryDocumentSnapshots)
+    {
+        int num=0;
+        imgAdapter.resetItem();
+        for(QueryDocumentSnapshot task : queryDocumentSnapshots)
+        {
+            Map<String, Object> data = task.getData();
+            Log.e("testing",data.get("title").toString());
+            PostItem temp = new PostItem();
+            ArrayList<String> previewURL = (ArrayList<String>) data.get("urlList");
+            Uri imageUri =null;
+            temp.setId(task.getId());
+            temp.writer = data.get("writer").toString();
+            temp.title = data.get("title").toString();
+            if(num==0)
+            {
+                firstTimeStamp = (Timestamp)data.get("time");//첫 글의 timestamp
+            }
+            if(num==queryDocumentSnapshots.size()-1)
+            {
+                lastTimeStamp = (Timestamp) data.get("time");//timestamp가져옴.
+                Log.e("lastTime",lastTimeStamp.toString());
+            }
+            if(previewURL.size()>0) {
+                Log.e("image", previewURL.get(0));
+                parentActivity.setDownloadURL(previewURL.get(0),temp,imgAdapter);
+            }
+            else
+            {
+                Resources resources = getContext().getResources();
+                imageUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE+"://"+resources.getResourcePackageName(R.drawable.defaultimg)+'/'+
+                        resources.getResourceTypeName(R.drawable.defaultimg)+'/'+resources.getResourceEntryName(R.drawable.defaultimg));
+                temp.image = imageUri;
+            }
+            num++;
+            imgAdapter.addItem(temp);
+        }
+    }
+    public void addItemToAdapter(PostItem item)
+    {
+        imgAdapter.addItem(item);
     }
 }

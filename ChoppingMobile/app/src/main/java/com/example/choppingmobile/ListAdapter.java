@@ -14,6 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
@@ -47,19 +49,17 @@ public class ListAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         final int pos = position;
-        if(convertView == null)
-        {
+        if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.new_item_layout,parent,false);
+            convertView = inflater.inflate(R.layout.new_item_layout, parent, false);
         }
         LinearLayout layout = convertView.findViewById(R.id.itemLayout);
         layout.setOnClickListener(new View.OnClickListener() {//listView 클릭했을 때 이벤트
             @Override
             public void onClick(View v) {
-                if(com) {//상업용일 때
+                if (com) {//상업용일 때
                     Toast.makeText(context, "커머셜" + position, Toast.LENGTH_SHORT).show();
-                }
-                else//상업용 아닐때
+                } else//상업용 아닐때
                 {
                     Toast.makeText(context, "커머셜X" + position, Toast.LENGTH_SHORT).show();
                 }
@@ -73,21 +73,36 @@ public class ListAdapter extends BaseAdapter {
             costView.setVisibility(View.GONE);
         Log.e("exception_t",Integer.toString(position));
         PostItem item = itemList.get(position);
-        if(item.image!=null)
-            imgView.setImageURI(item.image);
-        else
-            imgView.setBackgroundColor(Color.GRAY);
+        if(item.downloadURL!=null)
+        {
+            setImageFromGlide(imgView,item.downloadURL);
+        }else{
+            if(item.image!=null)
+                imgView.setImageURI(item.image);
+            else
+                imgView.setBackgroundColor(Color.GRAY);
+        }
         Log.e("exception_t",Integer.toString(position));
-        titleView.setText(item.title);
-        writerView.setText(item.writer);
-        costView.setText(item.cost);
+        titleView.setText("Title: "+item.title);
+        writerView.setText("Writer: "+item.writer);
+        costView.setText("Cost: "+item.cost);
         return convertView;
     }
-
+    public void setImageFromGlide(ImageView _imgView, String url)
+    {
+        Log.e("glide","glide...");
+        Glide.with(context).load(url).into(_imgView);
+    }
     public void addItem(PostItem item)
     {
         if(item!=null)
             itemList.add(item);
+        notifyDataSetChanged();
+    }
+    public void resetItem()
+    {
+        if(itemList!=null)
+            itemList.clear();
         notifyDataSetChanged();
     }
 }

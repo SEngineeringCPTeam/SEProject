@@ -12,7 +12,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -78,9 +80,9 @@ public class ServiceActivity extends AppCompatActivity {
     {
         serviceActivity=this;
         mainActivity=MainActivity.mainActivity;
+        mainActivity.getAuthority();
         db=FirebaseFirestore.getInstance();
         pageList= new HashMap<>();
-
         mStorageRef = FirebaseStorage.getInstance().getReference();
         initPages();
         initBtn();
@@ -156,6 +158,22 @@ public class ServiceActivity extends AppCompatActivity {
             }
         });
     }
+
+    public void setDownloadURL(final String url, final PostItem item, final ListAdapter adapter)
+    {
+        mStorageRef.child(url).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                item.downloadURL=uri.toString();
+                adapter.notifyDataSetChanged();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","Image Loading Failure");
+            }
+        });
+    }
     public void uploadUriToStorage(final IGetData iGetData,Uri uri)
     {
         final StorageReference ref= mStorageRef.child(imgPath+uri.getLastPathSegment());
@@ -203,4 +221,6 @@ public class ServiceActivity extends AppCompatActivity {
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
         return format.format(new Date());
     }
+
+
 }

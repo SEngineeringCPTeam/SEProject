@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -69,12 +70,14 @@ public class UserPage extends Fragment implements ICallbackTask{
         }
     }
     private MainActivity mainActivity;
+    private ServiceActivity serviceActivity;
     private User u;
     private FirebaseFirestore db;
 
     private TextView nameText;
     private TextView idText;
     private TextView authorityText;
+    private Button editBtn;
 
     private ListView postList;
     private ListView itemList;
@@ -83,6 +86,7 @@ public class UserPage extends Fragment implements ICallbackTask{
     {
         u=new User();
         mainActivity = MainActivity.mainActivity;
+        serviceActivity =ServiceActivity.serviceActivity;
         db = mainActivity.db;
     }
 
@@ -92,6 +96,8 @@ public class UserPage extends Fragment implements ICallbackTask{
         idText = vg.findViewById(R.id.userPage_idText);
         authorityText = vg.findViewById(R.id.userPage_authority);
 
+        editBtn = vg.findViewById(R.id.userPage_Edit);
+
         postList = vg.findViewById(R.id.userPostView);
         itemList = vg.findViewById(R.id.userItemView);
     }
@@ -100,12 +106,20 @@ public class UserPage extends Fragment implements ICallbackTask{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
         MainActivity.mainActivity.getUserData(this);
         ViewGroup vg = (ViewGroup) inflater.inflate(R.layout.fragment_user_page, container, false);
         init();
         initWidget(vg);
         getUserData();
+
+        editBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserEditFragment userEditFragment = new UserEditFragment();
+                serviceActivity.setVolatileScreen(userEditFragment);
+            }
+        });
+
         return vg;
     }
     public void getUserData()
