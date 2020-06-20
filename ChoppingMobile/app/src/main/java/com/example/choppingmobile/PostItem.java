@@ -8,7 +8,7 @@ public class PostItem {
     public String writer;
     public String cost;
     public String id;
-
+    public String downloadURL=null;
     public void setId(String _id)
     {
         id=_id;

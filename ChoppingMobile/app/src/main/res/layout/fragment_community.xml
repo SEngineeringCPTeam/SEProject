@@ -79,7 +79,7 @@
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/prev"
+                    android:id="@+id/prevBtn"
                     android:layout_alignParentLeft="true"
                     android:text="이전"
                     />
@@ -87,7 +87,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:id="@+id/next"
+                    android:id="@+id/nextBtn"
                     android:text="다음"
                     />
             </RelativeLayout>

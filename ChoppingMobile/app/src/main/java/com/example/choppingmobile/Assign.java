@@ -17,4 +17,5 @@ public class Assign {
     {
         id=_id;
     }
+    public void setAuthority(String _authority){authority=_authority;}
 }

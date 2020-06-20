@@ -106,15 +106,40 @@ public class MainActivity extends AppCompatActivity{
         return map;
     }
 
-    public void UploadBitmap(Bitmap bitmap)
+    public void renewalAssign(Assign _assign)
     {
+        if(_assign!=null)
+        {
 
-
+        }
     }
 
+    public void getAuthority()
+    {
+        if(assign!=null)
+        {
+            db.collection("User")
+                    .whereEqualTo("id",assign.id)
+                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            for(QueryDocumentSnapshot task:queryDocumentSnapshots)
+                            {
+                                assign.setAuthority(task.get("authority").toString());
+                            }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("exception","Load Assignment failure");
+                        }
+                    });
+        }
+    }
     public void getUserData(final ICallbackTask callback)
     {
-        User u = new User();
         if(assign!=null)
         {
             Query userDate=db.collection("User").whereEqualTo("id",assign.id);
