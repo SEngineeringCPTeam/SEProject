@@ -97,7 +97,7 @@ public class Community extends Fragment {
     Spinner searchOptSpinner;
     ArrayAdapter searchOptAdapter;
 
-    private int screenPostNum =2;
+    private int screenPostNum =5;
 
     EditText searchEdit;
     Button searchBtn;
@@ -157,7 +157,7 @@ public class Community extends Fragment {
         makePostBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                parentActivity.setVolatileScreen(new MakePostFragment());
+                parentActivity.setVolatileScreen(new MakePostFragment(false));
             }
         });
 
@@ -288,7 +288,7 @@ public class Community extends Fragment {
     }
     public void getCategoricalPrevList()
     {
-        postQuery.orderBy("time",Query.Direction.DESCENDING)
+        postQuery.orderBy("time",Query.Direction.ASCENDING)
                 .whereEqualTo("category",currentCategory)
                 .whereGreaterThan("time",firstTimeStamp.toDate())
                 .limit(screenPostNum)
@@ -449,7 +449,10 @@ public class Community extends Fragment {
                 temp.image = imageUri;
             }
             num++;
-            imgAdapter.addItem(temp);
+            if(direction)
+                imgAdapter.addItem(temp);
+            else
+                imgAdapter.pushItem(temp);
         }
     }
     public void addItemToAdapter(PostItem item)

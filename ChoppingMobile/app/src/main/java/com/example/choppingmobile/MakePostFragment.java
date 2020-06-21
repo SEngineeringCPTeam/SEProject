@@ -26,7 +26,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -58,7 +60,10 @@ public class MakePostFragment extends Fragment implements IGetData{
     public MakePostFragment() {
         // Required empty public constructor
     }
-
+    public MakePostFragment(boolean _isCommersial)
+    {
+        isCommercial = _isCommersial;
+    }
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -86,8 +91,10 @@ public class MakePostFragment extends Fragment implements IGetData{
         }
         init();
     }
+    public boolean isCommercial=false;
     private EditText titleEdit;
     private EditText contentEdit;
+    private EditText costEdit;
     private Spinner categorySpinner;
     private Button galleryBtn;
     private Button submitBtn;
@@ -111,12 +118,12 @@ public class MakePostFragment extends Fragment implements IGetData{
         category=new ArrayList<>();
         currentPostCommentField=new CommentField();
         getCategoryListFromDB();
-
         postInstance = new Post();
     }
 
     private void initWidget(ViewGroup vg)
     {
+        costEdit = vg.findViewById(R.id.itemCost);
         titleEdit=vg.findViewById(R.id.makePostTitleEdit);
         categorySpinner=vg.findViewById(R.id.categorySpinner);
         contentEdit=vg.findViewById(R.id.postContent);
@@ -131,6 +138,10 @@ public class MakePostFragment extends Fragment implements IGetData{
         ViewGroup vg = (ViewGroup) inflater.inflate(R.layout.fragment_make_post, container, false);
         initWidget(vg);
 
+        if(isCommercial)
+           costEdit.setVisibility(View.VISIBLE);
+        else
+            costEdit.setVisibility(View.GONE);
 
         viewPager.setAdapter(adapter);
         galleryBtn.setOnClickListener(new View.OnClickListener() {
@@ -145,7 +156,10 @@ public class MakePostFragment extends Fragment implements IGetData{
             @Override
             public void onClick(View v) {
                 if(formatValid()) {
-                    makePost();
+                    if(!isCommercial)
+                        makePost();
+                    else
+                        makeCommercialItem();
                 }
             }
         });
@@ -157,6 +171,18 @@ public class MakePostFragment extends Fragment implements IGetData{
             return false;
         if(contentEdit.getText().length()==0)
             return false;
+        if(isCommercial)
+        {
+            if(costEdit.getText().length()==0) {
+                Toast.makeText(getContext(), "가격을 입력해주세요", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            String cost=costEdit.getText().toString();
+            if(!isStringDouble(cost)) {
+                Toast.makeText(getContext(), "숫자를 입력해주세요", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
         return true;
     }
     public boolean validation()
@@ -167,6 +193,27 @@ public class MakePostFragment extends Fragment implements IGetData{
             return false;
         return true;
     }
+
+    public void makeCommercialItem()
+    {
+        postInstance.cost = costEdit.getText().toString();
+        postInstance.title=titleEdit.getText().toString();
+        postInstance.content=contentEdit.getText().toString();
+        postInstance.time = FieldValue.serverTimestamp();
+        postInstance.category=categorySpinner.getSelectedItem().toString();
+
+        ArrayList<Uri> images = adapter.getImages();
+
+        makeCommentField();
+        for(int i=0;i<images.size();i++)
+        {
+            serviceActivity.uploadUriToStorage(this, images.get(i));
+        }
+        ValidThread thread = new ValidThread(200);
+        thread.isDaemon();
+        thread.start();
+    }
+
     public void makePost()
     {
         postInstance.title=titleEdit.getText().toString();
@@ -188,7 +235,12 @@ public class MakePostFragment extends Fragment implements IGetData{
 
     public void submitPost()
     {
-        db.collection("Post").add(postInstance).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+        CollectionReference dbReference;
+        if(isCommercial)
+            dbReference = db.collection("Item");
+        else
+            dbReference = db.collection("Post");
+        dbReference.add(postInstance).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
             @Override
             public void onComplete(@NonNull Task<DocumentReference> task) {
                 Toast.makeText(getContext(),"Post가 등록되었습니다.",Toast.LENGTH_SHORT).show();
@@ -221,7 +273,11 @@ public class MakePostFragment extends Fragment implements IGetData{
 
     public void getCategoryListFromDB()
     {
-        Query categoryQuery = db.collection("Category").whereEqualTo("name","productCategory");
+        Query categoryQuery;
+        if(!isCommercial)
+            categoryQuery = db.collection("Category").whereEqualTo("name","postCategory");
+        else
+            categoryQuery = db.collection("Category").whereEqualTo("name","productCategory");
         categoryQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -244,6 +300,8 @@ public class MakePostFragment extends Fragment implements IGetData{
     public void getData(String id, Object data) {
         if(id.equals("category")){
             category=(ArrayList<String>) data;
+            if(category.contains("All"))
+                category.remove("All");
             categoryAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_dropdown_item,category);
             categorySpinner.setAdapter(categoryAdapter);
             Log.e("categoryLength",Integer.toString(category.size()));
@@ -271,6 +329,7 @@ public class MakePostFragment extends Fragment implements IGetData{
                 Uri imageUri = data.getData();
                 try {
                     adapter.appendBitmap(imageUri);
+                    viewPager.setVisibility(View.VISIBLE);
                     //serviceActivity.uploadUriToStorage(this,imageUri);
                 } catch (Exception ex)
                 {
@@ -301,4 +360,17 @@ public class MakePostFragment extends Fragment implements IGetData{
                 Log.e("testing","exception");
             }
         }
-    }}
+    }
+
+    public static boolean isStringDouble(String s)
+    {
+        try{
+            Double.parseDouble(s);
+            return true;
+        }
+        catch (NumberFormatException e)
+        {
+            return false;
+        }
+    }
+}

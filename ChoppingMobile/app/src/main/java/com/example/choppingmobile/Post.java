@@ -8,11 +8,12 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
+//데이터베이스에 올릴 때 이용되는 Post객체
 public class Post implements IDatabaseObject{
     public String title;
     public String content;
     public String writer;
+    public String cost;
     public String category;
     public ArrayList<String> urlList;
     public String commentId;
@@ -55,5 +56,6 @@ public class Post implements IDatabaseObject{
         content = (String)map.get("content");
         category=(String)map.get("category");
         urlList = (ArrayList<String>) map.get("urlList");
+        cost = (String)map.get("cost");
     }
 }

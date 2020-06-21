@@ -2,15 +2,28 @@ package com.example.choppingmobile;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 
@@ -28,9 +41,13 @@ public class PostFragment extends Fragment implements ICallbackTask{
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     public PostFragment() {
         // Required empty public constructor
+    }
+    public PostFragment(PostItem instance, boolean _com) {
+        // Required empty public constructor
+        currentPost = instance;
+        isCommercial = _com;
     }
 
     /**
@@ -53,9 +70,8 @@ public class PostFragment extends Fragment implements ICallbackTask{
 
     MainActivity mainActivity=null;
     FirebaseFirestore db=null;
-    Post currentPost=null;
-    ListView commentList=null;
-    ListView imageSlider=null;
+    PostItem currentPost=null;
+    ImageAdapter imageSlider=null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,24 +85,97 @@ public class PostFragment extends Fragment implements ICallbackTask{
     private void init()
     {
         mainActivity = MainActivity.mainActivity;
+        postInstance=new Post();
         db = mainActivity.db;
-        currentPost=new Post();
     }
-
+    private Post postInstance;
+    private Button submitBtn;
+    private EditText commentEdit;
+    private ListView commentList;
+    private ViewPager imageField;
+    private TextView content;
+    private boolean isCommercial;
+    private LinearLayout commentBody;
+    private RelativeLayout commercialBody;
+    private ArrayList<String> downloadURLList;
     private void initWidget(ViewGroup vg)
     {
+        content = vg.findViewById(R.id.postPageContent);
+        submitBtn = vg.findViewById(R.id.commentSubmitBtn);
+        commentEdit = vg.findViewById(R.id.commentField);
+        commentList = vg.findViewById(R.id.commentList);
+        imageField = vg.findViewById(R.id.postPageImage);
+        commentBody = vg.findViewById(R.id.postPageCommentBody);
+        commercialBody = vg.findViewById(R.id.postPageCommercial);
+        commentList = vg.findViewById(R.id.commentList);
+        if(currentPost!=null)
+        {
+            if(currentPost.downloadURL!=null)
+            {
+                imageField.setVisibility(View.VISIBLE);
+            }
+            if(isCommercial)
+            {
+                commercialBody.setVisibility(View.VISIBLE);
+                commentBody.setVisibility(View.GONE);
+            }
+            else
+            {
+                commercialBody.setVisibility(View.GONE);
+                commentBody.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+    public void composePage()
+    {
+        if(currentPost!=null)
+        {
 
+        }
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_post, container, false);
+        ViewGroup vg = (ViewGroup) inflater.inflate(R.layout.fragment_post, container, false);
+        init();
+        initWidget(vg);
+        setPostInstance();
+        return vg;
     }
 
     public void getImageFromDB()
     {
 
+    }
+
+    public void setPostInstance()
+    {
+        CollectionReference dbReference;
+        Log.e("content",currentPost.id);
+        Log.e("content",currentPost.title);
+        if(isCommercial)
+            dbReference = db.collection("Item");
+        else
+            dbReference = db.collection("Post");
+        if(currentPost!=null) {
+            dbReference.document(currentPost.id)
+                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            Log.e("content",documentSnapshot.getData().toString());
+                            postInstance.fromMap(documentSnapshot.getData());
+                            Log.e("content",postInstance.content);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("exception",e.toString());
+                        }
+                    });
+        }
     }
 
     @Override
