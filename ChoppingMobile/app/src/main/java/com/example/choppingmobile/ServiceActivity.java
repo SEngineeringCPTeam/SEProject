@@ -56,7 +56,7 @@ public class ServiceActivity extends AppCompatActivity {
     private UserPage userPageFragment=null;
     private State currentState=null;
     enum State{
-        Community, OpenMarket,User, mainPage
+        Community, OpenMarket,User, mainPage,idle
     };
     private void initPages()
     {
@@ -124,6 +124,13 @@ public class ServiceActivity extends AppCompatActivity {
         transaction.replace(R.id.serviceMainLayout,fragment).commit();
         transaction.addToBackStack(currentState.toString());
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        currentState=State.idle;
+    }
+
     public void setScreen(State state)
     {
         Log.e("fragment",state.toString());

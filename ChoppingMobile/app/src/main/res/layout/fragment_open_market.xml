@@ -79,6 +79,14 @@
                     android:text="이전"
                     />
                 <Button
+                    android:id="@+id/opnMarketCategoryBtn"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@+id/openMarketprev"
+                    android:layout_toLeftOf="@id/openMarketnext"
+                    android:text="Category"
+                    />
+                <Button
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_alignParentRight="true"

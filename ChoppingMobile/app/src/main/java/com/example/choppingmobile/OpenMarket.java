@@ -124,7 +124,6 @@ public class OpenMarket extends Fragment {
         searchSpinner.setAdapter(searchOptAdapter);
         openMarketList.setAdapter(imgAdapter);
 
-
         return vg;
     }
 

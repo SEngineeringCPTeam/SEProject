@@ -78,14 +78,22 @@
                 android:layout_weight="1">
                 <Button
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:id="@+id/prevBtn"
                     android:layout_alignParentLeft="true"
                     android:text="이전"
                     />
                 <Button
+                    android:id="@+id/communityCategoryBtn"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@+id/prevBtn"
+                    android:layout_toLeftOf="@id/nextBtn"
+                    android:text="Category"
+                    />
+                <Button
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_alignParentRight="true"
                     android:id="@+id/nextBtn"
                     android:text="다음"

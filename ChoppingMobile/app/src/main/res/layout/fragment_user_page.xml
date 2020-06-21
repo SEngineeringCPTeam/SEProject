@@ -67,14 +67,26 @@
                         android:textSize="20dp"
                         />
                     <Button
+                    android:layout_marginTop="5dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_below="@id/userPage_authority"
+                    android:id="@+id/userPage_Edit"
+                    android:text="Edit"
+                    android:textSize="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+                    <Button
                         android:layout_marginTop="5dp"
                         android:layout_alignParentBottom="true"
                         android:layout_below="@id/userPage_authority"
-                        android:id="@+id/userPage_Edit"
-                        android:text="Edit"
+                        android:layout_toRightOf="@+id/userPage_Edit"
+                        android:id="@+id/userPage_Manage"
+                        android:text="Manage"
                         android:textSize="8dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:visibility="gone"
                         />
                     <ImageView
                         android:layout_alignParentRight="true"
