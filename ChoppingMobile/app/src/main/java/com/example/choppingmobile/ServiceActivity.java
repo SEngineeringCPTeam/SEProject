@@ -165,7 +165,11 @@ public class ServiceActivity extends AppCompatActivity {
             }
         });
     }
-
+    public void setImageFromGlide(ImageView _imgView, String url)
+    {
+        Log.e("glide","glide...");
+        Glide.with(getApplicationContext()).load(url).into(_imgView);
+    }
     public void setDownloadURL(final String url, final PostItem item, final ListAdapter adapter)
     {
         mStorageRef.child(url).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {

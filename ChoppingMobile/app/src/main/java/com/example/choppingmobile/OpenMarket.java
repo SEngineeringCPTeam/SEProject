@@ -1,6 +1,8 @@
 package com.example.choppingmobile;
 
+import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -78,9 +81,14 @@ public class OpenMarket extends Fragment {
     }
 
     private FirebaseFirestore db;
+    private Query itemQuery;
     private MainActivity mainActivity;
     private ServiceActivity serviceActivity;
     private Button uploadBtn;
+    private Button categoryBtn;
+
+    private Button prevBtn;
+    private Button nextBtn;
 
     private ListAdapter imgAdapter;
     private Timestamp firstTimeStamp=null;
@@ -90,25 +98,36 @@ public class OpenMarket extends Fragment {
     private ListView openMarketList;
     private ArrayAdapter searchOptAdapter;
     ArrayList<String> categoryList;
+    String currentCategory="All";
+    int screenPostNum =5;
+
+    String[] builderCategory;
+    AlertDialog.Builder builder;
     public void init()
     {
         mainActivity=MainActivity.mainActivity;
         serviceActivity = ServiceActivity.serviceActivity;
 
         db=mainActivity.db;
-
+        itemQuery = db.collection("Item");
         imgAdapter = new ListAdapter(getContext(),true);
         categoryList = new ArrayList<>();
         searchOptAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_dropdown_item,categoryList);
+
+        builder = new AlertDialog.Builder(getContext());
     }
 
     public void initWidget(ViewGroup vg)
     {
+        categoryBtn = vg.findViewById(R.id.opnMarketCategoryBtn);
         uploadBtn=vg.findViewById(R.id.openMarketMakePostBtn);
         if(mainActivity.assign.authority.equals("Basic"))
             uploadBtn.setVisibility(View.GONE);
         searchSpinner = vg.findViewById(R.id.marketSearchOptSpinner);
         openMarketList = vg.findViewById(R.id.openMarketBodyList);
+
+        prevBtn = vg.findViewById(R.id.openMarketprev);
+        nextBtn =vg.findViewById(R.id.openMarketnext);
     }
 
 
@@ -120,15 +139,94 @@ public class OpenMarket extends Fragment {
         ViewGroup vg = (ViewGroup) inflater.inflate(R.layout.fragment_open_market, container, false);
         init();
         initWidget(vg);
+        getSearchList();
         getCategoryList();
+        getPost();
         searchSpinner.setAdapter(searchOptAdapter);
         openMarketList.setAdapter(imgAdapter);
+        categoryBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                builder.show();
+            }
+        });
+        prevBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(currentCategory.equals("All"))
+                {
+                    getPrevList();
+                }
+                else
+                {
+                    getCategoricalPrevList();
+                }
+            }
+        });
+        nextBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(currentCategory.equals("All"))
+                    getNextList();
+                else
+                    getCategoricalNextList();
+            }
+        });
 
+        uploadBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                serviceActivity.setVolatileScreen(new MakePostFragment(true));
+            }
+        });
         return vg;
     }
 
-
     public void getCategoryList()
+    {
+        DocumentReference query = db.collection("Category").document("Product");
+        query.get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        ArrayList<String> temp = (ArrayList<String>) documentSnapshot.get("category");
+                        builderCategory = new String[temp.size()];
+                        int pos = 0;
+                        for (String str:temp)
+                        {
+                            builderCategory[pos++] = str;
+                        }
+                        setBuilder();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","Error: load Category Failure");
+            }
+        });
+    }
+
+    public void setBuilder()
+    {
+        if(builderCategory!=null) {
+            builder.setItems(builderCategory, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    UICategory(builderCategory[which]);
+                }
+            });
+        }
+    }
+    public void UICategory(String category)
+    {
+        Log.e("category",category);
+        categoryBtn.setText(category);
+        currentCategory=category;
+        getPost();
+    }
+
+    public void getSearchList()
     {
         DocumentReference query = db.collection("Category").document("searchOption");
         query.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -149,7 +247,165 @@ public class OpenMarket extends Fragment {
         });
     }
 
-    public void composeScreen(QuerySnapshot queryDocumentSnapshots)
+    public void getPrevList()
+    {
+        Log.e("time",firstTimeStamp.toDate().toString());
+        itemQuery.orderBy("time", Query.Direction.ASCENDING)
+                .whereGreaterThan("time",firstTimeStamp.toDate())
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if(queryDocumentSnapshots.size()==0)
+                            Toast.makeText(getContext(),"맨 앞 페이지 입니다.",Toast.LENGTH_SHORT).show();
+                        else
+                        {
+                            Log.e("time",Integer.toString(queryDocumentSnapshots.size()));
+                            composeScreen(queryDocumentSnapshots,false);
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception","Load PrevPage Failure");
+                    }
+                });
+    }
+
+    public void getCategoricalPrevList()
+    {
+        itemQuery.orderBy("time",Query.Direction.ASCENDING)
+                .whereEqualTo("category",currentCategory)
+                .whereGreaterThan("time",firstTimeStamp.toDate())
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if(queryDocumentSnapshots.size()==0)
+                            Toast.makeText(getContext(),"맨 앞 페이지 입니다.",Toast.LENGTH_SHORT).show();
+                        else
+                        {
+                            Log.e("time",Integer.toString(queryDocumentSnapshots.size()));
+                            composeScreen(queryDocumentSnapshots,false);
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception","Load PrevPage Failure");
+                    }
+                });
+    }
+
+    public void getCategoricalNextList()
+    {
+        itemQuery.orderBy("time",Query.Direction.DESCENDING)
+                .whereEqualTo("category",currentCategory)
+                .whereLessThan("time",lastTimeStamp.toDate())//whereLessThan("time",lastTimeStamp)
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if(queryDocumentSnapshots.size()==0)
+                            Toast.makeText(getContext(),"마지막 페이지 입니다.",Toast.LENGTH_SHORT).show();
+                        else
+                        {
+                            Log.e("time",Integer.toString(queryDocumentSnapshots.size()));
+                            composeScreen(queryDocumentSnapshots,true);
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","load nextPage failure");
+            }
+        });
+    }
+    public void getNextList()
+    {
+        Log.e("time",lastTimeStamp.toDate().toString());
+        itemQuery.orderBy("time",Query.Direction.DESCENDING)
+                .whereLessThan("time",lastTimeStamp.toDate())//whereLessThan("time",lastTimeStamp)
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if(queryDocumentSnapshots.size()==0)
+                            Toast.makeText(getContext(),"마지막 페이지 입니다.",Toast.LENGTH_SHORT).show();
+                        else
+                        {
+                            Log.e("time",Integer.toString(queryDocumentSnapshots.size()));
+                            composeScreen(queryDocumentSnapshots,true);
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","load nextPage failure");
+            }
+        });
+    }
+    public void getPostList()
+    {
+        itemQuery.orderBy("time", Query.Direction.DESCENDING)
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        composeScreen(queryDocumentSnapshots,true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception","postLoading Failure");
+                    }
+                });
+    }
+
+    public void getPost()
+    {
+        if(currentCategory.equals("All"))
+        {
+            getPostList();
+        }
+        else
+        {
+            getCategoricalPost();
+        }
+    }
+
+    public void getCategoricalPost()
+    {
+        Log.e("category","Category");
+        db.collection("Item")
+                //
+                .whereEqualTo("category",currentCategory)
+                .orderBy("time", Query.Direction.DESCENDING)
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        composeScreen(queryDocumentSnapshots,true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
+    }
+    //direction true => 정방향, false => 역순
+    public void composeScreen(QuerySnapshot queryDocumentSnapshots, boolean direction)
     {
         int num=0;
         imgAdapter.resetItem();
@@ -163,13 +419,22 @@ public class OpenMarket extends Fragment {
             temp.setId(task.getId());
             temp.writer = data.get("writer").toString();
             temp.title = data.get("title").toString();
+            temp.isCom = true;
+            if(data.get("cost")!=null)
+                temp.cost=data.get("cost").toString();
             if(num==0)
             {
-                firstTimeStamp = (Timestamp)data.get("time");//첫 글의 timestamp
+                if(direction)
+                    firstTimeStamp = (Timestamp)data.get("time");//첫 글의 timestamp
+                else
+                    lastTimeStamp = (Timestamp)data.get("time");
             }
             if(num==queryDocumentSnapshots.size()-1)
             {
-                lastTimeStamp = (Timestamp) data.get("time");//timestamp가져옴.
+                if(direction)
+                    lastTimeStamp = (Timestamp) data.get("time");//timestamp가져옴.
+                else
+                    firstTimeStamp = (Timestamp)data.get("time");
                 Log.e("lastTime",lastTimeStamp.toString());
             }
             if(previewURL.size()>0) {
@@ -184,7 +449,10 @@ public class OpenMarket extends Fragment {
                 temp.image = imageUri;
             }
             num++;
-            imgAdapter.addItem(temp);
+            if(direction)
+                imgAdapter.addItem(temp);
+            else
+                imgAdapter.pushItem(temp);
         }
     }
 }

@@ -13,22 +13,35 @@ import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ImageAdapter extends PagerAdapter {
     private ArrayList<Uri> images;
+    private ArrayList<String> downloadUris;
+    private boolean onBitmap=true;
     private LayoutInflater inflater;
     private Context context;
+    ServiceActivity serviceActivity;
     public ImageAdapter(Context c)
     {
         context=c;
+        serviceActivity = (ServiceActivity)context;
         images=new ArrayList<>();
+    }
+    public ImageAdapter(Context c, ArrayList<String> uri, boolean _onBitmap)
+    {
+        context = c;
+        serviceActivity = (ServiceActivity)context;
+        onBitmap=_onBitmap;
     }
     public ImageAdapter(Context c,ArrayList<Uri> bitmaps)
     {
         context=c;
+        serviceActivity = (ServiceActivity)context;
         images=bitmaps;
+        onBitmap=true;
     }
     public void appendBitmap(Uri img)
     {
@@ -62,8 +75,13 @@ public class ImageAdapter extends PagerAdapter {
         inflater=(LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.slider, container,false);
         ImageView imageView = v.findViewById(R.id.sliderImage);
-        imageView.setImageURI(images.get(position));
-        Log.e("images",images.get(position).toString());
+        if(onBitmap)
+            imageView.setImageURI(images.get(position));
+        else
+        {
+            //다운로드 받는 부분.
+            serviceActivity.setImageFromGlide(imageView, downloadUris.get(position));
+        }
         container.addView(v);
         return v;
     }

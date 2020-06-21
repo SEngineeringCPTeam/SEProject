@@ -22,11 +22,13 @@ import java.util.ArrayList;
 
 public class ListAdapter extends BaseAdapter {
     private ArrayList<PostItem> itemList;
+    private ServiceActivity serviceActivity;
     private Context context;
     private boolean com=false;//상업용인지
     public ListAdapter(Context c, boolean _com)
     {
         context = c;
+        serviceActivity = (ServiceActivity)c;
         itemList=new ArrayList<>();
         com=_com;
     }
@@ -57,12 +59,10 @@ public class ListAdapter extends BaseAdapter {
         layout.setOnClickListener(new View.OnClickListener() {//listView 클릭했을 때 이벤트
             @Override
             public void onClick(View v) {
-                if (com) {//상업용일 때
-                    Toast.makeText(context, "커머셜" + position, Toast.LENGTH_SHORT).show();
-                } else//상업용 아닐때
-                {
-                    Toast.makeText(context, "커머셜X" + position, Toast.LENGTH_SHORT).show();
-                }
+                if(com)
+                    serviceActivity.setVolatileScreen(new PostFragment(itemList.get(position),true));
+                else
+                    serviceActivity.setVolatileScreen(new PostFragment(itemList.get(position),false));
             }
         });
         ImageView imgView = convertView.findViewById(R.id.itemImg);
@@ -101,7 +101,11 @@ public class ListAdapter extends BaseAdapter {
     }
     public void pushItem(PostItem item)
     {
-
+        if(item!=null)
+        {
+            itemList.add(0,item);
+        }
+        notifyDataSetChanged();
     }
     public void resetItem()
     {
