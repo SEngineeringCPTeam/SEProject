@@ -1,6 +1,8 @@
 package com.example.choppingmobile;
 
+import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -91,22 +93,25 @@ public class Community extends Fragment {
     Query postQuery;
     Button makePostBtn;
     RequestOptions requestOptions;//;glide option
-
+    String currentCategory="All";
     Spinner searchOptSpinner;
     ArrayAdapter searchOptAdapter;
 
-    private int screenPostNum =5;
+    private int screenPostNum =2;
 
     EditText searchEdit;
     Button searchBtn;
     Button prevBtn;
     Button nextBtn;
+    Button categoryBtn;
     Timestamp firstTimeStamp;
     Timestamp lastTimeStamp;
     ListView listView;
     ListAdapter imgAdapter;
     ArrayList<ImageView> listImgList;
     ArrayList<String> categoryList;
+    String[] builderCategory;
+    AlertDialog.Builder builder;
     private void init(ViewGroup vg)
     {
         parentActivity=(ServiceActivity) getActivity();
@@ -123,11 +128,14 @@ public class Community extends Fragment {
         categoryList = new ArrayList<>();
         searchOptAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_dropdown_item,categoryList);
         searchOptSpinner.setAdapter(searchOptAdapter);
+        builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Category");
     }
     private void init_widget(ViewGroup vg)
     {
         listView = vg.findViewById(R.id.communityBodyList);
         makePostBtn=vg.findViewById(R.id.communityMakePostBtn);
+        categoryBtn = vg.findViewById(R.id.communityCategoryBtn);
         prevBtn = vg.findViewById(R.id.prevBtn);
         nextBtn = vg.findViewById(R.id.nextBtn);
         viewPager=vg.findViewById(R.id.viewPager);
@@ -140,8 +148,11 @@ public class Community extends Fragment {
         ViewGroup vg =  (ViewGroup) inflater.inflate(R.layout.fragment_community, container, false);
         init(vg);
         init_widget(vg);
+        getSearchList();
         getCategoryList();
         listView.setAdapter(imgAdapter);
+        getPost();
+
 
         makePostBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,25 +160,39 @@ public class Community extends Fragment {
                 parentActivity.setVolatileScreen(new MakePostFragment());
             }
         });
-        getPostList();
 
         prevBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getPrevList();
+                if(currentCategory.equals("All"))
+                {
+                    getPrevList();
+                }
+                else
+                {
+                    getCategoricalPrevList();
+                }
             }
         });
-
         nextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getNextList();
+                if(currentCategory.equals("All"))
+                    getNextList();
+                else
+                    getCategoricalNextList();
+            }
+        });
+        categoryBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                builder.show();
             }
         });
         return vg;
     }
 
-    public void getCategoryList()
+    public void getSearchList()
     {
         DocumentReference query = db.collection("Category").document("searchOption");
         query.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -187,11 +212,84 @@ public class Community extends Fragment {
             }
         });
     }
-
-    public void getPrevList()
+    public void getCategoryList()
     {
-        Log.e("time",firstTimeStamp.toDate().toString());
+        DocumentReference query = db.collection("Category").document("postCategory");
+        query.get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        ArrayList<String> temp = (ArrayList<String>) documentSnapshot.get("category");
+                        builderCategory = new String[temp.size()];
+                        int pos = 0;
+                        for (String str:temp)
+                        {
+                            builderCategory[pos++] = str;
+                        }
+                        setBuilder();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","Error: load Category Failure");
+            }
+        });
+    }
+    public void setBuilder()
+    {
+        if(builderCategory!=null) {
+            builder.setItems(builderCategory, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    UICategory(builderCategory[which]);
+                }
+            });
+        }
+    }
+    public void UICategory(String category)
+    {
+        Log.e("category",category);
+        categoryBtn.setText(category);
+        currentCategory=category;
+        getPost();
+    }
+    public void getPost()
+    {
+        if(currentCategory.equals("All"))
+        {
+            getPostList();
+        }
+        else
+        {
+            getCategoricalPost();
+        }
+    }
+    public void getCategoricalPost()
+    {
+        db.collection("Post")
+                //
+                .whereEqualTo("category",currentCategory)
+                .orderBy("time", Query.Direction.DESCENDING)
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        composeScreen(queryDocumentSnapshots,true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception","postLoading Failure");
+                    }
+                });
+    }
+    public void getCategoricalPrevList()
+    {
         postQuery.orderBy("time",Query.Direction.DESCENDING)
+                .whereEqualTo("category",currentCategory)
                 .whereGreaterThan("time",firstTimeStamp.toDate())
                 .limit(screenPostNum)
                 .get()
@@ -203,7 +301,7 @@ public class Community extends Fragment {
                         else
                         {
                             Log.e("time",Integer.toString(queryDocumentSnapshots.size()));
-                            composeScreen(queryDocumentSnapshots);
+                            composeScreen(queryDocumentSnapshots,false);
                         }
                     }
                 })
@@ -214,7 +312,57 @@ public class Community extends Fragment {
                     }
                 });
     }
-
+    public void getPrevList()
+    {
+        Log.e("time",firstTimeStamp.toDate().toString());
+        postQuery.orderBy("time",Query.Direction.ASCENDING)
+                .whereGreaterThan("time",firstTimeStamp.toDate())
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if(queryDocumentSnapshots.size()==0)
+                            Toast.makeText(getContext(),"맨 앞 페이지 입니다.",Toast.LENGTH_SHORT).show();
+                        else
+                        {
+                            Log.e("time",Integer.toString(queryDocumentSnapshots.size()));
+                            composeScreen(queryDocumentSnapshots,false);
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception","Load PrevPage Failure");
+                    }
+                });
+    }
+    public void getCategoricalNextList()
+    {
+        postQuery.orderBy("time",Query.Direction.DESCENDING)
+                .whereEqualTo("category",currentCategory)
+                .whereLessThan("time",lastTimeStamp.toDate())//whereLessThan("time",lastTimeStamp)
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if(queryDocumentSnapshots.size()==0)
+                            Toast.makeText(getContext(),"마지막 페이지 입니다.",Toast.LENGTH_SHORT).show();
+                        else
+                        {
+                            Log.e("time",Integer.toString(queryDocumentSnapshots.size()));
+                            composeScreen(queryDocumentSnapshots,true);
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("exception","load nextPage failure");
+            }
+        });
+    }
     public void getNextList()
     {
         Log.e("time",lastTimeStamp.toDate().toString());
@@ -230,7 +378,7 @@ public class Community extends Fragment {
                         else
                         {
                             Log.e("time",Integer.toString(queryDocumentSnapshots.size()));
-                            composeScreen(queryDocumentSnapshots);
+                            composeScreen(queryDocumentSnapshots,true);
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -248,7 +396,7 @@ public class Community extends Fragment {
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        composeScreen(queryDocumentSnapshots);
+                        composeScreen(queryDocumentSnapshots,true);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -259,7 +407,8 @@ public class Community extends Fragment {
                 });
     }
 
-    public void composeScreen(QuerySnapshot queryDocumentSnapshots)
+    //direction true => 정방향, false => 역순
+    public void composeScreen(QuerySnapshot queryDocumentSnapshots, boolean direction)
     {
         int num=0;
         imgAdapter.resetItem();
@@ -275,11 +424,17 @@ public class Community extends Fragment {
             temp.title = data.get("title").toString();
             if(num==0)
             {
-                firstTimeStamp = (Timestamp)data.get("time");//첫 글의 timestamp
+                if(direction)
+                    firstTimeStamp = (Timestamp)data.get("time");//첫 글의 timestamp
+                else
+                    lastTimeStamp = (Timestamp)data.get("time");
             }
             if(num==queryDocumentSnapshots.size()-1)
             {
-                lastTimeStamp = (Timestamp) data.get("time");//timestamp가져옴.
+                if(direction)
+                    lastTimeStamp = (Timestamp) data.get("time");//timestamp가져옴.
+                else
+                    firstTimeStamp = (Timestamp)data.get("time");
                 Log.e("lastTime",lastTimeStamp.toString());
             }
             if(previewURL.size()>0) {

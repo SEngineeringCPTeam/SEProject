@@ -99,6 +99,10 @@ public class ListAdapter extends BaseAdapter {
             itemList.add(item);
         notifyDataSetChanged();
     }
+    public void pushItem(PostItem item)
+    {
+
+    }
     public void resetItem()
     {
         if(itemList!=null)

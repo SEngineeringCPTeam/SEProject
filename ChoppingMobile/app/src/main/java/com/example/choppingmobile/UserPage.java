@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -78,6 +79,7 @@ public class UserPage extends Fragment implements ICallbackTask{
     private TextView idText;
     private TextView authorityText;
     private Button editBtn;
+    private Button manageBtn;
 
     private ListView postList;
     private ListView itemList;
@@ -97,7 +99,11 @@ public class UserPage extends Fragment implements ICallbackTask{
         authorityText = vg.findViewById(R.id.userPage_authority);
 
         editBtn = vg.findViewById(R.id.userPage_Edit);
-
+        manageBtn = vg.findViewById(R.id.userPage_Manage);
+        if(!mainActivity.assign.authority.equals("Admin"))
+            manageBtn.setVisibility(View.GONE);
+        else
+            manageBtn.setVisibility(View.VISIBLE);
         postList = vg.findViewById(R.id.userPostView);
         itemList = vg.findViewById(R.id.userItemView);
     }
@@ -111,7 +117,12 @@ public class UserPage extends Fragment implements ICallbackTask{
         init();
         initWidget(vg);
         getUserData();
-
+        manageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "유저 메니지먼트",Toast.LENGTH_SHORT).show();
+            }
+        });
         editBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
