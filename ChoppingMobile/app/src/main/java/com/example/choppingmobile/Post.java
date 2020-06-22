@@ -18,7 +18,6 @@ public class Post implements IDatabaseObject{
     public ArrayList<String> urlList;
     public String commentId;
     public FieldValue time;
-
     public Post(String _title, String con, String _commentId)
     {
         title=_title;

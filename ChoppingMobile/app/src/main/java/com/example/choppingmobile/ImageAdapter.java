@@ -29,6 +29,7 @@ public class ImageAdapter extends PagerAdapter {
         context=c;
         serviceActivity = (ServiceActivity)context;
         images=new ArrayList<>();
+        onBitmap=false;
     }
     public ImageAdapter(Context c, ArrayList<String> uri, boolean _onBitmap)
     {
@@ -47,7 +48,7 @@ public class ImageAdapter extends PagerAdapter {
     {
         if(images!=null) {
             images.add(img);
-            Log.e("images",Integer.toString(images.size()));
+            Log.e("qwerty",img.toString());
             notifyDataSetChanged();
         }
     }
@@ -80,7 +81,7 @@ public class ImageAdapter extends PagerAdapter {
         else
         {
             //다운로드 받는 부분.
-            serviceActivity.setImageFromGlide(imageView, downloadUris.get(position));
+            serviceActivity.setImageFromGlide(imageView, images.get(position).toString());
         }
         container.addView(v);
         return v;

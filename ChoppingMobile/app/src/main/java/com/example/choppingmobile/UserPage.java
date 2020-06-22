@@ -115,12 +115,14 @@ public class UserPage extends Fragment implements ICallbackTask{
         MainActivity.mainActivity.getUserData(this);
         ViewGroup vg = (ViewGroup) inflater.inflate(R.layout.fragment_user_page, container, false);
         init();
+        mainActivity.getAuthority();
         initWidget(vg);
         getUserData();
         manageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "유저 메니지먼트",Toast.LENGTH_SHORT).show();
+                ManageFragment manageFragment = new ManageFragment();
+                serviceActivity.setVolatileScreen(manageFragment);
             }
         });
         editBtn.setOnClickListener(new View.OnClickListener() {
