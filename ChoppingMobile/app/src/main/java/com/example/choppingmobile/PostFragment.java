@@ -1,5 +1,6 @@
 package com.example.choppingmobile;
 
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -22,6 +23,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -69,10 +71,11 @@ public class PostFragment extends Fragment implements ICallbackTask{
     }
 
     MainActivity mainActivity=null;
+    ServiceActivity serviceActivity =null;
     FirebaseFirestore db=null;
     PostItem currentPost=null;
     ImageAdapter imageSlider=null;
-
+    Post post =null;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,8 +88,12 @@ public class PostFragment extends Fragment implements ICallbackTask{
     private void init()
     {
         mainActivity = MainActivity.mainActivity;
+        serviceActivity = ServiceActivity.serviceActivity;
         postInstance=new Post();
+        post = new Post();
         db = mainActivity.db;
+        storageReference = serviceActivity.mStorageRef;
+        imageSlider = new ImageAdapter(getContext());
     }
     private Post postInstance;
     private Button submitBtn;
@@ -98,6 +105,8 @@ public class PostFragment extends Fragment implements ICallbackTask{
     private LinearLayout commentBody;
     private RelativeLayout commercialBody;
     private ArrayList<String> downloadURLList;
+    private StorageReference storageReference;
+
     private void initWidget(ViewGroup vg)
     {
         content = vg.findViewById(R.id.postPageContent);
@@ -130,8 +139,28 @@ public class PostFragment extends Fragment implements ICallbackTask{
     {
         if(currentPost!=null)
         {
-
+            content.setText(postInstance.content);
         }
+    }
+
+    public void getDownloadURL(String url)
+    {
+        Log.e("downloadUri",url);
+        storageReference.child(url)
+                .getDownloadUrl()
+                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Log.e("downloadUri",uri.toString());
+                        imageSlider.appendBitmap(uri);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -141,13 +170,11 @@ public class PostFragment extends Fragment implements ICallbackTask{
         init();
         initWidget(vg);
         setPostInstance();
+        imageField.setAdapter(imageSlider);
+
         return vg;
     }
 
-    public void getImageFromDB()
-    {
-
-    }
 
     public void setPostInstance()
     {
@@ -166,7 +193,21 @@ public class PostFragment extends Fragment implements ICallbackTask{
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             Log.e("content",documentSnapshot.getData().toString());
                             postInstance.fromMap(documentSnapshot.getData());
-                            Log.e("content",postInstance.content);
+                            composePage();
+
+                            if(postInstance!=null)
+                            {
+                                for(String uri:postInstance.urlList)
+                                {
+                                    getDownloadURL(uri);
+                                }
+                                if(imageSlider.getCount()>0) {
+                                    Log.e("image",Integer.toString(imageSlider.getCount()));
+                                    imageField.setVisibility(View.VISIBLE);
+                                }
+                                else
+                                    Log.e("image",Integer.toString(imageSlider.getCount()));
+                            }
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {

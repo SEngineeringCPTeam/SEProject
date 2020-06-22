@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:weightSum="12"
-        android:background="#FF0F9F">
+        android:background="#EA6759">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -99,7 +99,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="#FF0F9F"
+                android:background="#EA6759"
                 android:orientation="horizontal"
                 >
 

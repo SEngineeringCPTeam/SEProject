@@ -8,7 +8,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:id="@+id/itemLayout"
-        android:background="#FF7979"
+        android:background="@color/themeColorDark"
         >
         <ImageView
             android:layout_width="100dp"

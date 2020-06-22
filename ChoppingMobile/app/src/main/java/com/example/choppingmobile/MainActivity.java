@@ -66,33 +66,6 @@ public class MainActivity extends AppCompatActivity{
         init();
         FragmentTransaction transaction= getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.fragmentLayout, loginScreen).commit();
-        Button sendBtn = findViewById(R.id.messageBtn);
-        getMessage = findViewById(R.id.searchBtn);
-        childUpdates=new HashMap<>();
-        info = new Info("김철수","M","19970101","01012341234","성남시 가천대학교");
-        sendBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                db.collection("User").add(user).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("db","DocumentSnapShot added with ID: "+documentReference.getId());
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d("db","Error adding document",e);
-                    }
-                });
-            }
-        });
-        getMessage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, GetData.class);
-                startActivity(intent);
-            }
-        });
     }
     public static Map<String, Object> JSONtoMap(DataSnapshot dataSnapshot)
     {

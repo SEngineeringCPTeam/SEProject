@@ -21,8 +21,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -233,5 +236,84 @@ public class ServiceActivity extends AppCompatActivity {
         return format.format(new Date());
     }
 
+    public void changeAuthority(final Requirement req)
+    {
+        db.collection("User")
+                .whereEqualTo("id",req.writer)
+                .get()
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for(QueryDocumentSnapshot task:queryDocumentSnapshots)
+                        {
+                           String id=task.getId();
+                           setAuthority(id, req.requirementID);
+                           removeRequirement(req.writer);
+                        }
+                    }
+                });
+    }
+    public void removeRequirement(String id)
+    {
+        db.collection("Requirement")
+                .whereEqualTo("writer",id)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (QueryDocumentSnapshot task:queryDocumentSnapshots)
+                        {
+                            removeFromDB(task.getId(),"Requirement");
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
+    }
+    public void removeFromDB(String id, String field)
+    {
+        db.collection(field).document(id)
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.e("success","deleteSuccess");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
+    }
+
+    public void setAuthority(String id, String authority)
+    {
+        DocumentReference reference = db.collection("User").document(id);
+        reference.update("authority",authority)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.e("success","success");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
+    }
 
 }
