@@ -13,46 +13,56 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.core.content.ContextCompat;
-
-import org.w3c.dom.Text;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-public class ReqAdapter extends BaseAdapter {
-    ArrayList<Requirement> reqList;
+public class CommentAdapter extends BaseAdapter {
+    Context c;
+    ArrayList<Comment> comments;
     AlertDialog.Builder builder;
-    Context context;
-    Requirement currentRequirement;
-    int currentPosition =0;
-    public ReqAdapter(Context c)
+    Comment currentComment;
+    MainActivity mainActivity;
+    ServiceActivity serviceActivity;
+    int currentPosition = -1;
+
+    public CommentAdapter(Context _c)
     {
-        context=c;
-        reqList=new ArrayList<>();
+        mainActivity = MainActivity.mainActivity;
+        serviceActivity = ServiceActivity.serviceActivity;
+        c = _c;
+        comments=new ArrayList<>();
+        currentComment=null;
         setBuilder();
     }
 
-    public ReqAdapter(Context c, ArrayList<Requirement> _r)
+    public CommentAdapter(Context _c, ArrayList<Comment> _commentList)
     {
-        context=c;
-        reqList=_r;
+        mainActivity = MainActivity.mainActivity;
+        serviceActivity = ServiceActivity.serviceActivity;
+        c = _c;
+        comments=_commentList;
+        currentComment=null;
         setBuilder();
     }
+
     public void setBuilder()
     {
-        builder = new AlertDialog.Builder(context);
+        builder = new AlertDialog.Builder(c);
         builder.setTitle("Message")
-                .setMessage("권한을 허용하시겠습니까?")
+                .setMessage("삭제하시겠습니까?")
                 .setCancelable(true)
                 .setPositiveButton("확인", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (currentRequirement != null)
+                        if (currentPosition!=-1)
                         {
-                            ServiceActivity.serviceActivity.changeAuthority(currentRequirement);
+                            Log.e("delete","delete");
+                            serviceActivity.removeComment(comments.get(currentPosition));
                             removeItem(currentPosition);
+                            currentPosition=-1;
+                            //데이터셋에서 삭제
                         }
+                        else
+                            Log.e("delete","null");
                     }
                 })
                 .setNegativeButton("취소", new DialogInterface.OnClickListener() {
@@ -62,54 +72,61 @@ public class ReqAdapter extends BaseAdapter {
                     }
                 });
     }
+    public void getList(ArrayList<Comment> commentList)
+    {
+        comments=commentList;
+        notifyDataSetChanged();
+    }
     @Override
     public int getCount() {
-        return reqList.size();
+        return comments.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return reqList.get(position);
+        return comments.get(position);
     }
 
     @Override
     public long getItemId(int position) {
         return position;
     }
+
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         final int pos = position;
         if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.requirement_item, parent, false);
         }
+        final Comment com = comments.get(position);
+
         LinearLayout layout = convertView.findViewById(R.id.reqLayout);
-        final Requirement requirement = reqList.get(pos);
         TextView id = convertView.findViewById(R.id.ReqUserId);
         TextView content = convertView.findViewById(R.id.reqContent);
-        Log.e("req",Integer.toString(reqList.size()));
-        if(reqList!=null)
+
+        if(com!=null)
         {
-            if(id!=null)
-                id.setText(requirement.writer);
-            if(content!=null)
-                content.setText(requirement.content);
-            layout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //클릭 시
-                    currentRequirement = requirement;
+            id.setText(com.writerId);
+            content.setText(com.content);
+        }
+        layout.setOnClickListener(new View.OnClickListener() {//listView 클릭했을 때 이벤트
+            @Override
+            public void onClick(View v) {
+                if(com.writerId.equals(mainActivity.assign.id)||mainActivity.assign.authority.equals("Admin"))
+                {
                     currentPosition=position;
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 }
-            });
-        }
+            }
+        });
+
         return convertView;
     }
     public void removeItem(int position)
     {
-        reqList.remove(position);
+        comments.remove(position);
         notifyDataSetChanged();
     }
 }

@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -31,7 +32,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -149,6 +152,80 @@ public class ServiceActivity extends AppCompatActivity {
             }
         }
     }
+
+    public boolean removeComment(Comment comment)
+    {
+        final String commentField = comment.commentId;
+        Date date = comment.getTimestamp().toDate();
+        db.collection("Comment")
+                .whereEqualTo("time",date)
+                .whereEqualTo("writerId",comment.writerId)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for(QueryDocumentSnapshot task:queryDocumentSnapshots)
+                        {
+                            String id = task.getId();
+                            removeFromDB(id,"Comment");
+                            removeFromCommentList(commentField,id);
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
+        return true;
+    }
+
+    public void removeFromCommentList(final String commentId,final String comment)
+    {
+        Log.e("comment",commentId);
+        db.collection("CommentList")
+                .document(commentId)
+                .get()
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception", e.toString());
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        ArrayList<String> commentList = (ArrayList<String>)documentSnapshot.get("commentList");
+                        commentList.remove(comment);
+                        modifyList(documentSnapshot.getId(),commentList);
+                    }
+                });
+    }
+
+    public void modifyList(String id, ArrayList<String> comment)
+    {
+        db.collection("CommentList").document(id)
+                .update("commentList",comment)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.e("update","modifySuccess");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
+    }
+
+    public void modifyList(ArrayList<String> comments)
+    {
+
+    }
+
     public void setDefaultBitmap(Bitmap b)
     {
         defaultBitmap=b;
