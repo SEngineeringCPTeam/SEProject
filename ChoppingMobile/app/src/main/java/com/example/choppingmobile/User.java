@@ -31,19 +31,21 @@ public class User implements IDatabaseObject{
         info=_info;
         authority=aut;
     }
-    public void setUser(String _id, String _password)
+    public boolean setUser(String _id, String _password)
     {
         id=_id;
         password=_password;
+        return true;
         //userInfo=new Info();
     }
-    public void setUser(Map<String, Object> data)
+    public boolean setUser(Map<String, Object> data)
     {
         id=(String)data.get("id");
         password=(String) data.get("password");
         authority = (String)data.get("authority");
         info = (HashMap<String,String>)data.get("info");
         //userInfo.setInfo((HashMap<String,Object>)data.get("userInfo"));
+        return true;
     }
 
     public void setInfo(String _name, String _gender, String _birth, String _pNumber, String _address)

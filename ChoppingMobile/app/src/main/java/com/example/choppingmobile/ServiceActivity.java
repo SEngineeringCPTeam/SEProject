@@ -221,14 +221,11 @@ public class ServiceActivity extends AppCompatActivity {
                 });
     }
 
-    public void modifyList(ArrayList<String> comments)
-    {
 
-    }
-
-    public void setDefaultBitmap(Bitmap b)
+    public int setDefaultBitmap(Bitmap b)
     {
         defaultBitmap=b;
+        return defaultBitmap.getWidth();
     }
 
     public void getBitmapFromStorage(String url, final ICallbackTask callbackTask)
@@ -282,29 +279,6 @@ public class ServiceActivity extends AppCompatActivity {
                 Log.e("Theuri",taskSnapshot.getMetadata().getName());
             }
         });
-    }
-    //current Not used
-    public void uploadBitmapToStorageByte(Bitmap bitmap)
-    {
-        bitmap = Bitmap.createScaledBitmap(bitmap,300,300,true);
-        String img_url ="";
-        img_url = imgPath+getDate()+mainActivity.assign.id;
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,100,baos);
-        byte[] data = baos.toByteArray();
-        UploadTask uploadTask = mStorageRef.child(img_url).putBytes(data);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e("exception","imageUploadFailure");
-            }
-        }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-
-                }
-            });
     }
 
     public String getDate()

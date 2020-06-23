@@ -132,11 +132,12 @@ public class BuyFragment extends Fragment {
                     }
                 });
     }
-    public void appendItems(String id)
+    public int appendItems(String id)
     {
         items.add(id);
+        return items.size();
     }
-    public void appendCost(String _cost)
+    public int appendCost(String _cost)
     {
         try {
             int c = Integer.parseInt(_cost);
@@ -147,5 +148,6 @@ public class BuyFragment extends Fragment {
             Log.e("exception",e.toString());
             serviceActivity.endTask(this);
         }
+        return cost;
     }
 }

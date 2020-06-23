@@ -26,6 +26,7 @@ public class ReqAdapter extends BaseAdapter {
     Context context;
     Requirement currentRequirement;
     int currentPosition =0;
+
     public ReqAdapter(Context c)
     {
         context=c;
@@ -107,9 +108,10 @@ public class ReqAdapter extends BaseAdapter {
         }
         return convertView;
     }
-    public void removeItem(int position)
+    public boolean removeItem(int position)
     {
         reqList.remove(position);
         notifyDataSetChanged();
+        return true;
     }
 }

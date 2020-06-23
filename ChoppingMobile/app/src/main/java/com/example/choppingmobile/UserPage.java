@@ -87,13 +87,14 @@ public class UserPage extends Fragment implements ICallbackTask{
     private Button editBtn;
     private Button manageBtn;
     private Button buyBtn;
+    private Button refundBtn;
     private ListView postList;
     private ListView itemList;
     private int screenPostNum =10;
     ListAdapter imgAdapter;
     ArrayList<CartItem> items;
     CartAdapter cartAdapter;
-    private void init()
+    public boolean init()
     {
         u=new User();
         mainActivity = MainActivity.mainActivity;
@@ -101,6 +102,7 @@ public class UserPage extends Fragment implements ICallbackTask{
         db = mainActivity.db;
         items = new ArrayList<>();
         imgAdapter = new ListAdapter(getContext(),false);
+        return true;
     }
 
     private void initWidget(ViewGroup vg)
@@ -115,6 +117,7 @@ public class UserPage extends Fragment implements ICallbackTask{
             manageBtn.setVisibility(View.GONE);
         else
             manageBtn.setVisibility(View.VISIBLE);
+        refundBtn = vg.findViewById(R.id.refundBtn);
         postList = vg.findViewById(R.id.userPostView);
         itemList = vg.findViewById(R.id.userItemView);
     }
@@ -162,10 +165,19 @@ public class UserPage extends Fragment implements ICallbackTask{
                 }
             }
         });
+        refundBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RefundFragment refundFragment = new RefundFragment();
+                serviceActivity.setVolatileScreen(refundFragment);
+            }
+        });
         return vg;
     }
-    public void getUserData()
+    public boolean getUserData()
     {
+        if(mainActivity.assign==null)
+            return false;
         String id = mainActivity.assign.id;
         Query userQuery = db.collection("User").whereEqualTo("id",id);
         userQuery.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -184,6 +196,7 @@ public class UserPage extends Fragment implements ICallbackTask{
                 Log.e("exception","getUserData Failure");
             }
         });
+        return true;
     }
     @Override
     public void GetData(Map<String, Object> data) {
@@ -203,9 +216,11 @@ public class UserPage extends Fragment implements ICallbackTask{
         authorityText.setText("권한: "+_u.authority);
     }
 
-    public void getPostList()
+    public boolean getPostList()
     {
         Query postQuery = db.collection("Post").whereEqualTo("writer",mainActivity.assign.id);
+        if(postQuery==null)
+            return false;
         postQuery.orderBy("time", Query.Direction.DESCENDING)
                 .limit(screenPostNum)
                 .get()
@@ -221,9 +236,12 @@ public class UserPage extends Fragment implements ICallbackTask{
                         Log.e("exception","postLoading Failure");
                     }
                 });
+        return true;
     }
-    public void getCart()
+    public boolean getCart()
     {
+        if(db==null)
+            return false;
         CollectionReference cartReference = db.collection("Cart");
         cartReference.get()
                 .addOnFailureListener(new OnFailureListener() {
@@ -245,12 +263,21 @@ public class UserPage extends Fragment implements ICallbackTask{
                         itemList.setAdapter(cartAdapter);
                     }
                 });
+        return true;
+    }
+    public int add(int a, int b)
+    {
+        int result = a+b;
+        return result;
     }
 
-    public void composeScreen(QuerySnapshot queryDocumentSnapshots, boolean direction)
+    public boolean composeScreen(QuerySnapshot queryDocumentSnapshots, boolean direction)
     {
         int num=0;
+        boolean isvalid =true;
         imgAdapter.resetItem();
+        if(queryDocumentSnapshots == null)
+            return false;
         for(QueryDocumentSnapshot task : queryDocumentSnapshots)
         {
             Log.e("test","testing_smap");
@@ -280,5 +307,6 @@ public class UserPage extends Fragment implements ICallbackTask{
             else
                 imgAdapter.pushItem(temp);
         }
+        return  true;
     }
 }
