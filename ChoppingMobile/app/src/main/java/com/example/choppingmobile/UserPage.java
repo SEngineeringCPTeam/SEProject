@@ -86,7 +86,7 @@ public class UserPage extends Fragment implements ICallbackTask{
     private TextView authorityText;
     private Button editBtn;
     private Button manageBtn;
-
+    private Button buyBtn;
     private ListView postList;
     private ListView itemList;
     private int screenPostNum =10;
@@ -108,7 +108,7 @@ public class UserPage extends Fragment implements ICallbackTask{
         nameText = vg.findViewById(R.id.userPage_nameText);
         idText = vg.findViewById(R.id.userPage_idText);
         authorityText = vg.findViewById(R.id.userPage_authority);
-
+        buyBtn =vg.findViewById(R.id.cart_buyBtn);
         editBtn = vg.findViewById(R.id.userPage_Edit);
         manageBtn = vg.findViewById(R.id.userPage_Manage);
         if(!mainActivity.assign.authority.equals("Admin"))
@@ -146,7 +146,22 @@ public class UserPage extends Fragment implements ICallbackTask{
                 serviceActivity.setVolatileScreen(userEditFragment);
             }
         });
+        buyBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(cartAdapter.getCount()>0) {
 
+                    BuyFragment buyFragment = new BuyFragment();
+                    for(int i=0;i<items.size();i++)
+                    {
+                        buyFragment.appendItems(items.get(i).itemID);
+                        buyFragment.appendCost(items.get(i).cost);
+                    }
+                    cartAdapter.clear();
+                    serviceActivity.setVolatileScreen(buyFragment);
+                }
+            }
+        });
         return vg;
     }
     public void getUserData()
@@ -207,7 +222,6 @@ public class UserPage extends Fragment implements ICallbackTask{
                     }
                 });
     }
-
     public void getCart()
     {
         CollectionReference cartReference = db.collection("Cart");

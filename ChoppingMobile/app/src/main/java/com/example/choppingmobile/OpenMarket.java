@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -89,7 +90,8 @@ public class OpenMarket extends Fragment {
 
     private Button prevBtn;
     private Button nextBtn;
-
+    private Button searchBtn;
+    private EditText searchEdit;
     private ListAdapter imgAdapter;
     private Timestamp firstTimeStamp=null;
     private Timestamp lastTimeStamp = null;
@@ -125,6 +127,8 @@ public class OpenMarket extends Fragment {
             uploadBtn.setVisibility(View.GONE);
         searchSpinner = vg.findViewById(R.id.marketSearchOptSpinner);
         openMarketList = vg.findViewById(R.id.openMarketBodyList);
+        searchBtn = vg.findViewById(R.id.marketSearchBtn);
+        searchEdit = vg.findViewById(R.id.marketSearchEdit);
 
         prevBtn = vg.findViewById(R.id.openMarketprev);
         nextBtn =vg.findViewById(R.id.openMarketnext);
@@ -179,9 +183,32 @@ public class OpenMarket extends Fragment {
                 serviceActivity.setVolatileScreen(new MakePostFragment(true));
             }
         });
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(searchEdit.getText().length()>0&&!searchSpinner.getSelectedItem().toString().equals("검색")) {
+                    String field = translator(searchSpinner.getSelectedItem().toString());
+                    boolean cat = false;
+                    if(!currentCategory.equals("All"))
+                        cat = true;
+                    getSearchList(field,searchEdit.getText().toString(),cat);
+                }
+            }
+        });
         return vg;
     }
-
+    public String translator(String input)
+    {
+        if(input.equals("제목"))
+        {
+            return "title";
+        }
+        else if(input.equals("작성자"))
+        {
+            return "writer";
+        }
+        return "null";
+    }
     public void getCategoryList()
     {
         DocumentReference query = db.collection("Category").document("Product");
@@ -395,6 +422,29 @@ public class OpenMarket extends Fragment {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         composeScreen(queryDocumentSnapshots,true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
+    }
+
+    public void getSearchList(String field, String word, boolean category)
+    {
+        Query query = db.collection("Item")
+                .orderBy("time", Query.Direction.DESCENDING)
+                .whereEqualTo(field, word);
+        if(category)
+            query = query.whereEqualTo("category",currentCategory);
+        query = query.limit(screenPostNum);
+        query.get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        composeScreen(queryDocumentSnapshots, true);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

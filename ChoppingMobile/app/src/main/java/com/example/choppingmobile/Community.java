@@ -138,6 +138,8 @@ public class Community extends Fragment {
         prevBtn = vg.findViewById(R.id.prevBtn);
         nextBtn = vg.findViewById(R.id.nextBtn);
         viewPager=vg.findViewById(R.id.viewPager);
+        searchBtn = vg.findViewById(R.id.communitySearchBtn);
+        searchEdit = vg.findViewById(R.id.communitySearchEdit);
     }
 
     @Override
@@ -159,7 +161,18 @@ public class Community extends Fragment {
                 parentActivity.setVolatileScreen(new MakePostFragment(false));
             }
         });
-
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(searchEdit.getText().length()>0&&!searchOptSpinner.getSelectedItem().toString().equals("검색")) {
+                    String field = translator(searchOptSpinner.getSelectedItem().toString());
+                    boolean cat = false;
+                    if(!currentCategory.equals("All"))
+                        cat = true;
+                    getSearchList(field,searchEdit.getText().toString(),cat);
+                }
+            }
+        });
         prevBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,10 +180,19 @@ public class Community extends Fragment {
                 {
                     getPrevList();
                 }
-                else
+                else if(searchEdit.getText().length()==0)
                 {
                     getCategoricalPrevList();
                 }
+                else if(!searchOptSpinner.getSelectedItem().toString().equals("검색")){
+                    String field = translator(searchOptSpinner.getSelectedItem().toString());
+                    boolean cat = false;
+                    if(!currentCategory.equals("All"))
+                        cat = true;
+                    //getSearchPrev(field,searchEdit.getText().toString(),cat);
+                }
+                else if(searchOptSpinner.getSelectedItem().toString().equals("검색"))
+                    searchEdit.setText("");
             }
         });
         nextBtn.setOnClickListener(new View.OnClickListener() {
@@ -178,8 +200,17 @@ public class Community extends Fragment {
             public void onClick(View v) {
                 if(currentCategory.equals("All"))
                     getNextList();
-                else
+                else if(searchEdit.getText().length()==0)
                     getCategoricalNextList();
+                else if(!searchOptSpinner.getSelectedItem().toString().equals("검색")){
+                    String field = translator(searchOptSpinner.getSelectedItem().toString());
+                    boolean cat = false;
+                    if(!currentCategory.equals("All"))
+                        cat = true;
+                    //getSearchNext(field, searchEdit.getText().toString(),cat);
+                }
+                else if(searchOptSpinner.getSelectedItem().toString().equals("검색"))
+                    searchEdit.setText("");
             }
         });
         categoryBtn.setOnClickListener(new View.OnClickListener() {
@@ -189,6 +220,86 @@ public class Community extends Fragment {
             }
         });
         return vg;
+    }
+    public String translator(String input)
+    {
+        if(input.equals("제목"))
+        {
+            return "title";
+        }
+        else if(input.equals("작성자"))
+        {
+            return "writer";
+        }
+        return "null";
+    }
+    public void getSearchList(String field, String word, boolean category)
+    {
+         Query query = db.collection("Post")
+                .orderBy("time", Query.Direction.DESCENDING)
+                .whereEqualTo(field, word);
+         if(category)
+             query = query.whereEqualTo("category",currentCategory);
+         query = query.limit(screenPostNum);
+         query.get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        composeScreen(queryDocumentSnapshots, true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
+    }
+
+    public void getSearchNext(String field, String word, boolean category)
+    {
+        Query query = db.collection("Post")
+                .orderBy("time", Query.Direction.DESCENDING)
+                .whereEqualTo(field, word);
+        if(category)
+            query = query.whereEqualTo("category",currentCategory);
+        query = query.whereLessThan("time",lastTimeStamp.toDate()).limit(screenPostNum);
+        query.get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        composeScreen(queryDocumentSnapshots, true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
+    }
+
+    public void getSearchPrev(String field, String word, boolean category)
+    {
+        Query query = db.collection("Post")
+                .orderBy("time", Query.Direction.ASCENDING)
+                .whereEqualTo(field, word);
+        if(category)
+            query = query.whereEqualTo("category",currentCategory);
+        query = query.whereGreaterThan("time",lastTimeStamp.toDate()).limit(screenPostNum);
+        query.get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        composeScreen(queryDocumentSnapshots, false);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
     }
 
     public void getSearchList()
@@ -251,6 +362,8 @@ public class Community extends Fragment {
         Log.e("category",category);
         categoryBtn.setText(category);
         currentCategory=category;
+        searchOptSpinner.setSelection(0);
+        searchEdit.setText("");
         getPost();
     }
     public void getPost()
