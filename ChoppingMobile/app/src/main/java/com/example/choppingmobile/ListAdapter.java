@@ -93,24 +93,34 @@ public class ListAdapter extends BaseAdapter {
         Log.e("glide","glide...");
         Glide.with(context).load(url).into(_imgView);
     }
-    public void addItem(PostItem item)
+    public boolean addItem(PostItem item)
     {
         if(item!=null)
             itemList.add(item);
         notifyDataSetChanged();
+        return true;
     }
-    public void pushItem(PostItem item)
+    public int pushItem(PostItem item)
     {
+        int val;
         if(item!=null)
         {
             itemList.add(0,item);
+            val = itemList.size();
+        }
+        else
+            val =-1;
+        notifyDataSetChanged();
+        return val;
+    }
+    public int resetItem()
+    {
+        int val =-1;
+        if(itemList!=null) {
+            itemList.clear();
+            val=0;
         }
         notifyDataSetChanged();
-    }
-    public void resetItem()
-    {
-        if(itemList!=null)
-            itemList.clear();
-        notifyDataSetChanged();
+        return val;
     }
 }

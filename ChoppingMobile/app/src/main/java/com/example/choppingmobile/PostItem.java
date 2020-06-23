@@ -1,6 +1,9 @@
 package com.example.choppingmobile;
 
 import android.net.Uri;
+
+import java.util.HashMap;
+
 //ListView에 출력될 때 사용되는 PostItem객체
 public class PostItem {
     public Uri image;
@@ -31,5 +34,16 @@ public class PostItem {
         writer=_writer;
         cost=_cost;
         isCom=_com;
+    }
+
+    public HashMap<String, Object> toMap()
+    {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("image", image);
+        map.put("title",title);
+        map.put("writer",writer);
+        map.put("cost",cost);
+        map.put("isCom",isCom);
+        return map;
     }
 }

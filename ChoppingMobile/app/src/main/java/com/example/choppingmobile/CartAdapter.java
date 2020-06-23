@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import java.util.ArrayList;
 
 public class CartAdapter extends BaseAdapter {
@@ -101,19 +100,28 @@ public class CartAdapter extends BaseAdapter {
         }
         return convertView;
     }
-    public void removeItem(int position)
+
+    public boolean removeItem(int position)
     {
-        ServiceActivity.serviceActivity.foundId(itemList.get(position),"remove");
-        itemList.remove(position);
-        notifyDataSetChanged();
-    }
-    public void clear()
-    {
-        for(CartItem item:itemList)
-        {
-            ServiceActivity.serviceActivity.foundId(item,"remove");
+        if(itemList!=null) {
+            ServiceActivity.serviceActivity.foundId(itemList.get(position), "remove");
+            itemList.remove(position);
+            notifyDataSetChanged();
+            return true;
         }
-        itemList.clear();
-        notifyDataSetChanged();
+        return false;
+    }
+
+    public boolean clear()
+    {
+        if(itemList!=null) {
+            for (CartItem item : itemList) {
+                ServiceActivity.serviceActivity.foundId(item, "remove");
+            }
+            itemList.clear();
+            notifyDataSetChanged();
+            return true;
+        }
+        return false;
     }
 }

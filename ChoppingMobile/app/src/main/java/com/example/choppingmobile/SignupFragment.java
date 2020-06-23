@@ -27,6 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.sql.Struct;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -294,7 +295,7 @@ public class SignupFragment extends Fragment {
             Log.e("testing",user.info.get("name"));
         return user;
     }
-    private void signUp(User user)
+    private boolean signUp(User user)
     {
         db.collection("User").add(user.toMap()).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
             @Override
@@ -307,5 +308,6 @@ public class SignupFragment extends Fragment {
                 Toast.makeText(getContext(),"Error: 회원가입에 실패하였습니다.",Toast.LENGTH_SHORT).show();
             }
         });
+        return true;
     }
 }

@@ -79,12 +79,15 @@ public class MainActivity extends AppCompatActivity{
         return map;
     }
 
-    public void renewalAssign(Assign _assign)
+    public boolean renewalAssign(Assign _assign)
     {
         if(_assign!=null)
         {
-
+            assign.id = _assign.id;
+            assign.authority = _assign.authority;
+            return true;
         }
+        return false;
     }
 
     public void getAuthority()

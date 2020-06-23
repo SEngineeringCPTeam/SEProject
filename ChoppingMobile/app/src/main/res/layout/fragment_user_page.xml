@@ -152,13 +152,24 @@
                             android:layout_height="wrap_content"
                             android:id="@+id/userItemView"
                             />
-                        <Button
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/cart_buyBtn"
-                            android:text="buy"
-                            android:layout_gravity="right"
-                            />
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+                            <Button
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/cart_buyBtn"
+                                android:text="buy"
+                                android:layout_alignParentRight="true"
+                                />
+                            <Button
+                                android:layout_toLeftOf="@id/cart_buyBtn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/refundBtn"
+                                android:text="refund"
+                                />
+                        </RelativeLayout>
                     </LinearLayout>
                 </ScrollView>
             </LinearLayout>

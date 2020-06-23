@@ -20,10 +20,11 @@ public class Requirement {
         content=_c;
     }
 
-    public void fromMap(Map<String, Object> map)
+    public Requirement fromMap(Map<String, Object> map)
     {
         writer = (String) map.get("writer");
         requirementID = (String) map.get("requirementID");
         content = (String) map.get("content");
+        return this;
     }
 }
