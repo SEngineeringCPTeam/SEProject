@@ -54,6 +54,7 @@ public class Post implements IDatabaseObject{
         title = (String) map.get("title");
         content = (String)map.get("content");
         category=(String)map.get("category");
+        commentId = (String) map.get("commentId");
         urlList = (ArrayList<String>) map.get("urlList");
         cost = (String)map.get("cost");
     }

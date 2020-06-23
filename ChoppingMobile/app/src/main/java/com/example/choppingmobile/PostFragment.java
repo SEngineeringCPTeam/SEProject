@@ -21,8 +21,11 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
@@ -76,6 +79,7 @@ public class PostFragment extends Fragment implements ICallbackTask{
     PostItem currentPost=null;
     ImageAdapter imageSlider=null;
     Post post =null;
+    String id;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,13 +98,18 @@ public class PostFragment extends Fragment implements ICallbackTask{
         db = mainActivity.db;
         storageReference = serviceActivity.mStorageRef;
         imageSlider = new ImageAdapter(getContext());
+        commentAdapter = new CommentAdapter(getContext());
     }
     private Post postInstance;
     private Button submitBtn;
+    private Button buyBtn;
+    private Button cartBtn;
     private EditText commentEdit;
     private ListView commentList;
+    private CommentAdapter commentAdapter;
     private ViewPager imageField;
     private TextView content;
+    private TextView costText;
     private boolean isCommercial;
     private LinearLayout commentBody;
     private RelativeLayout commercialBody;
@@ -109,6 +118,9 @@ public class PostFragment extends Fragment implements ICallbackTask{
 
     private void initWidget(ViewGroup vg)
     {
+        buyBtn = vg.findViewById(R.id.buyBtn);
+        cartBtn = vg.findViewById(R.id.cartBtn);
+        costText = vg.findViewById(R.id.postPageCostField);
         content = vg.findViewById(R.id.postPageContent);
         submitBtn = vg.findViewById(R.id.commentSubmitBtn);
         commentEdit = vg.findViewById(R.id.commentField);
@@ -171,8 +183,137 @@ public class PostFragment extends Fragment implements ICallbackTask{
         initWidget(vg);
         setPostInstance();
         imageField.setAdapter(imageSlider);
-
+        submitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(commentEdit.getText().length()!=0)
+                {
+                    //makeComment
+                    Comment _com = new Comment();
+                    _com.commentId = postInstance.commentId;
+                    _com.writerId=mainActivity.assign.id;
+                    _com.content=commentEdit.getText().toString();
+                    uploadComment(_com);
+                    commentEdit.setText("");
+                }
+            }
+        });
+        buyBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //구매 시 발생하는 event
+                BuyFragment buyFragment = new BuyFragment();
+                buyFragment.id=id;
+                serviceActivity.setVolatileScreen(buyFragment);
+            }
+        });
+        cartBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //장바구니 이벤트
+            }
+        });
+        if(!isCommercial)
+        {
+            commentList.setAdapter(commentAdapter);
+        }
         return vg;
+    }
+    public void updateCommentField(ArrayList<String> comments)
+    {
+        if(postInstance!=null)
+        {
+            String commentField = postInstance.commentId;
+            db.collection("CommentList")
+                    .document(commentField)
+                    .update("commentList",comments)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.e("update","commentFieldUpdated");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("exception",e.toString());
+                        }
+                    });
+        }
+    }
+    public boolean uploadComment(Comment comment)
+    {
+        if(postInstance!=null)
+        {
+            final String commentField = postInstance.commentId;
+            final DocumentReference reference = db.collection("CommentList").document(commentField);
+            db.collection("Comment")
+                    .add(comment)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(final DocumentReference documentReference) {
+                            final String id = documentReference.getId();
+                            reference.get()
+                                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                            ArrayList<String> commentList = (ArrayList<String>) documentSnapshot.get("commentList");
+                                            commentList.add(commentList.size(),id);
+                                            updateCommentField(commentList);
+                                            getComments(postInstance.commentId);
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.e("exception",e.toString());
+                                        }
+                                    });
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("exception",e.toString());
+                        }
+                    });
+            return true;
+        }
+        else
+            return false;
+    }
+    public void getComments(String id)
+    {
+        final ArrayList<Comment> comments = new ArrayList<>();
+        Log.e("comments",postInstance.commentId);
+        db.collection("Comment")
+                .whereEqualTo("commentId",id)
+                .get()
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception", e.toString());
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for(QueryDocumentSnapshot task:queryDocumentSnapshots)
+                        {
+                            Comment nc  =new Comment();
+                            nc.fromMap(task.getData());
+                            comments.add(nc);
+                        }
+                        commentAdapter.getList(comments);
+                        Log.e("comments",Integer.toString(comments.size()));
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
     }
 
 
@@ -193,6 +334,7 @@ public class PostFragment extends Fragment implements ICallbackTask{
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             Log.e("content",documentSnapshot.getData().toString());
                             postInstance.fromMap(documentSnapshot.getData());
+                            id = documentSnapshot.getId();
                             composePage();
 
                             if(postInstance!=null)
@@ -207,6 +349,14 @@ public class PostFragment extends Fragment implements ICallbackTask{
                                 }
                                 else
                                     Log.e("image",Integer.toString(imageSlider.getCount()));
+                                if(!isCommercial)
+                                {
+                                    getComments(postInstance.commentId);
+                                }
+                                else
+                                {
+                                    costText.setText(postInstance.cost);
+                                }
                             }
                         }
                     })
