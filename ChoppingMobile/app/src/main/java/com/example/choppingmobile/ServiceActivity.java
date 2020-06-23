@@ -392,5 +392,10 @@ public class ServiceActivity extends AppCompatActivity {
                     }
                 });
     }
-
+    public void endTask(Fragment fragment)
+    {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().remove(fragment).commit();
+        fragmentManager.popBackStack();
+    }
 }

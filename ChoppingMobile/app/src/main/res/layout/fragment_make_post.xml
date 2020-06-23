@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:weightSum="12"
-        android:background="#F9FF0F">
+        android:background="@color/themeColor">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -102,7 +102,7 @@
             android:layout_height="0dp"
             android:layout_weight="1.5"
             android:id="@+id/makePostSubmitLayout"
-            android:background="#00FF00">
+            android:background="@color/themeColor">
             <EditText
                 android:layout_alignParentLeft="true"
                 android:layout_width="200dp"

@@ -142,11 +142,24 @@
                     android:layout_height="match_parent"
                     android:fillViewport="true"
                     >
-                    <ListView
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:id="@+id/userItemView"
-                        />
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        >
+                        <ListView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/userItemView"
+                            />
+                        <Button
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/cart_buyBtn"
+                            android:text="buy"
+                            android:layout_gravity="right"
+                            />
+                    </LinearLayout>
                 </ScrollView>
             </LinearLayout>
         </LinearLayout>

@@ -108,7 +108,6 @@ public class Community extends Fragment {
     Timestamp lastTimeStamp;
     ListView listView;
     ListAdapter imgAdapter;
-    ArrayList<ImageView> listImgList;
     ArrayList<String> categoryList;
     String[] builderCategory;
     AlertDialog.Builder builder;

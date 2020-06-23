@@ -1,5 +1,8 @@
 package com.example.choppingmobile;
 
+import android.content.ContentResolver;
+import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,11 +19,15 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Map;
 
 
@@ -74,7 +81,6 @@ public class UserPage extends Fragment implements ICallbackTask{
     private ServiceActivity serviceActivity;
     private User u;
     private FirebaseFirestore db;
-
     private TextView nameText;
     private TextView idText;
     private TextView authorityText;
@@ -83,13 +89,18 @@ public class UserPage extends Fragment implements ICallbackTask{
 
     private ListView postList;
     private ListView itemList;
-
+    private int screenPostNum =10;
+    ListAdapter imgAdapter;
+    ArrayList<CartItem> items;
+    CartAdapter cartAdapter;
     private void init()
     {
         u=new User();
         mainActivity = MainActivity.mainActivity;
         serviceActivity =ServiceActivity.serviceActivity;
         db = mainActivity.db;
+        items = new ArrayList<>();
+        imgAdapter = new ListAdapter(getContext(),false);
     }
 
     private void initWidget(ViewGroup vg)
@@ -117,7 +128,10 @@ public class UserPage extends Fragment implements ICallbackTask{
         init();
         mainActivity.getAuthority();
         initWidget(vg);
+        postList.setAdapter(imgAdapter);
         getUserData();
+        getPostList();
+        getCart();
         manageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -172,5 +186,85 @@ public class UserPage extends Fragment implements ICallbackTask{
         nameText.setText("이름: "+_u.info.get("name"));
         idText.setText("ID: "+_u.id);
         authorityText.setText("권한: "+_u.authority);
+    }
+
+    public void getPostList()
+    {
+        Query postQuery = db.collection("Post").whereEqualTo("writer",mainActivity.assign.id);
+        postQuery.orderBy("time", Query.Direction.DESCENDING)
+                .limit(screenPostNum)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        composeScreen(queryDocumentSnapshots,true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception","postLoading Failure");
+                    }
+                });
+    }
+
+    public void getCart()
+    {
+        CollectionReference cartReference = db.collection("Cart");
+        cartReference.get()
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for(QueryDocumentSnapshot task:queryDocumentSnapshots)
+                        {
+                            CartItem item = new CartItem();
+                            item.fromMap(task.getData());
+                            items.add(item);
+                        }
+                        cartAdapter=new CartAdapter(getContext(), items);
+                        itemList.setAdapter(cartAdapter);
+                    }
+                });
+    }
+
+    public void composeScreen(QuerySnapshot queryDocumentSnapshots, boolean direction)
+    {
+        int num=0;
+        imgAdapter.resetItem();
+        for(QueryDocumentSnapshot task : queryDocumentSnapshots)
+        {
+            Log.e("test","testing_smap");
+            Map<String, Object> data = task.getData();
+            Log.e("testing",data.get("title").toString());
+            PostItem temp = new PostItem();
+            ArrayList<String> previewURL = (ArrayList<String>) data.get("urlList");
+            Uri imageUri =null;
+            temp.setId(task.getId());
+            temp.writer = data.get("writer").toString();
+            temp.title = data.get("title").toString();
+
+            if(previewURL.size()>0) {
+                Log.e("image", previewURL.get(0));
+                serviceActivity.setDownloadURL(previewURL.get(0),temp,imgAdapter);
+            }
+            else
+            {
+                Resources resources = getContext().getResources();
+                imageUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE+"://"+resources.getResourcePackageName(R.drawable.defaultimg)+'/'+
+                        resources.getResourceTypeName(R.drawable.defaultimg)+'/'+resources.getResourceEntryName(R.drawable.defaultimg));
+                temp.image = imageUri;
+            }
+            num++;
+            if(direction)
+                imgAdapter.addItem(temp);
+            else
+                imgAdapter.pushItem(temp);
+        }
     }
 }

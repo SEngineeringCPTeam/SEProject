@@ -211,6 +211,7 @@ public class PostFragment extends Fragment implements ICallbackTask{
             @Override
             public void onClick(View v) {
                 //장바구니 이벤트
+                uploadCart();
             }
         });
         if(!isCommercial)
@@ -377,6 +378,28 @@ public class PostFragment extends Fragment implements ICallbackTask{
     @Override
     public void GetData(Object obj) {
         //비트맵을 받는 Task
+    }
 
+    public void uploadCart()
+    {
+        CartItem cartItem = new CartItem();
+        cartItem.itemID = id;
+        cartItem.buyer = mainActivity.assign.id;
+        cartItem.itemName = postInstance.title;
+        cartItem.cost = postInstance.cost;
+        db.collection("Cart")
+                .add(cartItem)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.e("upload",documentReference.getId());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
     }
 }

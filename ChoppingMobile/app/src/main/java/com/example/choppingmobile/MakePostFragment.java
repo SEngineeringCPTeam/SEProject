@@ -244,6 +244,7 @@ public class MakePostFragment extends Fragment implements IGetData{
             @Override
             public void onComplete(@NonNull Task<DocumentReference> task) {
                 Toast.makeText(getContext(),"Post가 등록되었습니다.",Toast.LENGTH_SHORT).show();
+                endTask();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -252,7 +253,10 @@ public class MakePostFragment extends Fragment implements IGetData{
             }
         });
     }
-
+    public void endTask()
+    {
+        serviceActivity.endTask(this);
+    }
     public void makeCommentField()
     {
         currentPostCommentField.writerId=mainActivity.assign.id;
