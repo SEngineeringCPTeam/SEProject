@@ -20,12 +20,15 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.model.value.TimestampValue;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
@@ -204,6 +207,8 @@ public class PostFragment extends Fragment implements ICallbackTask{
                 //구매 시 발생하는 event
                 BuyFragment buyFragment = new BuyFragment();
                 buyFragment.id=id;
+                buyFragment.appendItems(currentPost.id);
+                buyFragment.appendCost(postInstance.cost);
                 serviceActivity.setVolatileScreen(buyFragment);
             }
         });
@@ -387,6 +392,7 @@ public class PostFragment extends Fragment implements ICallbackTask{
         cartItem.buyer = mainActivity.assign.id;
         cartItem.itemName = postInstance.title;
         cartItem.cost = postInstance.cost;
+        cartItem.time= Timestamp.now();
         db.collection("Cart")
                 .add(cartItem)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {

@@ -1,5 +1,8 @@
 package com.example.choppingmobile;
 
+
+import com.google.firebase.Timestamp;
+
 import java.util.Map;
 
 public class CartItem {
@@ -7,7 +10,7 @@ public class CartItem {
     public String itemID;
     public String itemName;
     public String cost;
-
+    public Timestamp time;
     public CartItem() {
 
     }
@@ -25,5 +28,6 @@ public class CartItem {
         itemID = (String)map.get("itemID");
         itemName = (String)map.get("itemName");
         cost = (String)map.get("cost");
+        time =(Timestamp)map.get("time");
     }
 }

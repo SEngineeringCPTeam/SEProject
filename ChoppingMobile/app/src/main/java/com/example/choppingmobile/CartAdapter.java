@@ -103,7 +103,17 @@ public class CartAdapter extends BaseAdapter {
     }
     public void removeItem(int position)
     {
+        ServiceActivity.serviceActivity.foundId(itemList.get(position),"remove");
         itemList.remove(position);
+        notifyDataSetChanged();
+    }
+    public void clear()
+    {
+        for(CartItem item:itemList)
+        {
+            ServiceActivity.serviceActivity.foundId(item,"remove");
+        }
+        itemList.clear();
         notifyDataSetChanged();
     }
 }

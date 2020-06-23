@@ -398,4 +398,51 @@ public class ServiceActivity extends AppCompatActivity {
         fragmentManager.beginTransaction().remove(fragment).commit();
         fragmentManager.popBackStack();
     }
+    public void foundId(CartItem item, final String action)
+    {
+        Log.e("num","num");
+        db.collection("Cart")
+                .whereEqualTo("itemID",item.itemID)
+                .whereEqualTo("buyer",mainActivity.assign.id)
+                .whereEqualTo("time",item.time.toDate())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (QueryDocumentSnapshot task:queryDocumentSnapshots)
+                        {
+                            String cartId = task.getId();
+                            if(action.equals("remove"))
+                            {
+                                removeCart(cartId);
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                });
+    }
+    public void removeCart(String itemID)
+    {
+        Log.e("id",itemID);
+        db.collection("Cart")
+                .document(itemID)
+                .delete()
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.e("success","removeCartSuccess");
+                    }
+                });
+    }
 }

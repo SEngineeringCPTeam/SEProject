@@ -2,11 +2,23 @@ package com.example.choppingmobile;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
 
 
 /**
@@ -24,11 +36,13 @@ public class BuyFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     public BuyFragment() {
+        init();
         // Required empty public constructor
     }
     public BuyFragment(String _id) {
         // Required empty public constructor
         id=_id;
+        init();
     }
 
     /**
@@ -57,23 +71,81 @@ public class BuyFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-
+    ServiceActivity serviceActivity;
+    MainActivity mainActivity;
     String id;
+    ArrayList<String> items;
+    FirebaseFirestore db;
+
+    TextView costView;
+    Button submitBtn;
+    int cost;
     public void init()
     {
-
+        items=new ArrayList<>();
+        serviceActivity=ServiceActivity.serviceActivity;
+        mainActivity=MainActivity.mainActivity;
+        db = serviceActivity.db;
     }
 
-    public void initWidget()
+    public void initWidget(ViewGroup vg)
     {
-
+        costView = vg.findViewById(R.id.resultPage_cost);
+        submitBtn = vg.findViewById(R.id.resultPage_submitBtn);
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         ViewGroup vg = (ViewGroup) inflater.inflate(R.layout.fragment_buy, container, false);
-
+        initWidget(vg);
+        costView.setText("Cost: "+Integer.toString(cost));
+        submitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                makeOrder();
+            }
+        });
         return vg;
+    }
+
+    public void makeOrder()
+    {
+        Receipt order = new Receipt();
+        order.time= Timestamp.now();
+        order.buyer=mainActivity.assign.id;
+        order.items =items;
+        order.cost=cost;
+
+        db.collection("Order")
+                .add(order)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("exception",e.toString());
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        documentReference.update("id",documentReference.getId());
+                    }
+                });
+    }
+    public void appendItems(String id)
+    {
+        items.add(id);
+    }
+    public void appendCost(String _cost)
+    {
+        try {
+            int c = Integer.parseInt(_cost);
+            cost+=c;
+        }
+        catch (Exception e)
+        {
+            Log.e("exception",e.toString());
+            serviceActivity.endTask(this);
+        }
     }
 }
