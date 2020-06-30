@@ -33,6 +33,7 @@ public class CartAdapter extends BaseAdapter {
         itemList =_r;
         setBuilder();
     }
+
     public void setBuilder()
     {
         builder = new AlertDialog.Builder(context);
@@ -69,6 +70,11 @@ public class CartAdapter extends BaseAdapter {
     public long getItemId(int position) {
         return position;
     }
+
+    /*
+    * getView: get View of Adapter
+    * @param clicked position, clicked View, clicked ViewGroup
+     */
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         final int pos = position;
@@ -100,7 +106,11 @@ public class CartAdapter extends BaseAdapter {
         }
         return convertView;
     }
-
+    /*
+    * removeItem: remove Item from current List, cart database
+    * @param: position of item(Integer)
+    * @turn: success or not
+     */
     public boolean removeItem(int position)
     {
         if(itemList!=null) {

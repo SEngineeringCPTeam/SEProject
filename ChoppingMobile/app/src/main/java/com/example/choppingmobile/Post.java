@@ -42,12 +42,21 @@ public class Post implements IDatabaseObject{
     {
         commentId = cid;
     }
-
+    /*
+     * toMap: compose Map Class which include Object's data
+     * @param: None
+     * @turn: map_include object data
+     */
     @Override
     public Map<String, Object> toMap() {
         return null;
     }
 
+    /*
+     * fromMap: compose Object from Map class
+     * @param: map_include object data
+     * @return: None
+     */
     @Override
     public void fromMap(Map<String,Object> map)
     {

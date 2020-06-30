@@ -124,6 +124,11 @@ public class CommentAdapter extends BaseAdapter {
 
         return convertView;
     }
+    /*
+    * removeItem: remove Item from list
+    * @param: list position
+    * @turn: list size
+     */
     public int removeItem(int position)
     {
         comments.remove(position);

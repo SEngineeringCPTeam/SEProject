@@ -78,7 +78,11 @@ public class MainActivity extends AppCompatActivity{
         }
         return map;
     }
-
+    /*
+    * renewalAssign: modify current Assignment
+    * @param assign value
+    * @turn success or not
+     */
     public boolean renewalAssign(Assign _assign)
     {
         if(_assign!=null)
@@ -89,7 +93,11 @@ public class MainActivity extends AppCompatActivity{
         }
         return false;
     }
-
+    /*
+    * getAuthority: get Authority from database
+    * @param None
+    * @turn None
+     */
     public void getAuthority()
     {
         if(assign!=null)
@@ -114,6 +122,11 @@ public class MainActivity extends AppCompatActivity{
                     });
         }
     }
+    /*
+    * getUserData: get User data from databaase
+    * @param callback class which want get a data
+    * @turn None
+     */
     public void getUserData(final ICallbackTask callback)
     {
         if(assign!=null)
@@ -130,7 +143,11 @@ public class MainActivity extends AppCompatActivity{
             });
         }
     }
-
+    /*
+    * setScreen: sec Main Activity fragment
+    * @param screen which flate on screen
+    * @turn None
+     */
     public void setScreen(Screen screen)
     {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

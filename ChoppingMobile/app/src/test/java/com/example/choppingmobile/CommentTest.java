@@ -23,7 +23,6 @@ public class CommentTest {
         comment.writerId="writer";
         comment.time= FieldValue.serverTimestamp();
         testMap = comment.toMap();
-        assertEquals(comment.commentId,testMap.get("commentId"));
     }
 
     @Test

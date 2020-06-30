@@ -100,7 +100,11 @@ public class ManageFragment extends Fragment {
         getReq();
         return vg;
     }
-
+    /*
+    * getReq: get current Requirement from database
+    * @param None
+    * @turn None
+     */
     public void getReq()
     {
         reqReference.get()

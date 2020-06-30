@@ -96,6 +96,12 @@ public class RefundFragment extends Fragment {
 
         return vg;
     }
+
+    /*
+    * readData: download refund data from database
+    * @param None
+    * @param is success or not
+     */
     public boolean readData()
     {
         final ArrayList<Receipt> r_list = new ArrayList<>();

@@ -165,6 +165,11 @@ public class MakePostFragment extends Fragment implements IGetData{
         });
         return vg;
     }
+    /*
+    * formatValid: confirm this post is valid or not
+    * @param None
+    * @turn is valid or not
+     */
     public boolean formatValid()
     {
         if(titleEdit.getText().length()==0)
@@ -185,6 +190,12 @@ public class MakePostFragment extends Fragment implements IGetData{
         }
         return true;
     }
+
+    /*
+    * validation: confirm is valid which get from intent or db
+    * @param None
+    * @turn is valid or not
+     */
     public boolean validation()
     {
         if(postInstance.urlList.size()<adapter.getImages().size())
@@ -193,7 +204,11 @@ public class MakePostFragment extends Fragment implements IGetData{
             return false;
         return true;
     }
-
+    /*
+    * makeCommercialItem: make Item and upload to database
+    * @param None
+    * @turn None
+     */
     public void makeCommercialItem()
     {
         postInstance.cost = costEdit.getText().toString();
@@ -213,7 +228,11 @@ public class MakePostFragment extends Fragment implements IGetData{
         thread.isDaemon();
         thread.start();
     }
-
+    /*
+     * makePost: start making post
+     * @param None
+     * @turn None
+     */
     public void makePost()
     {
         postInstance.title=titleEdit.getText().toString();
@@ -232,7 +251,11 @@ public class MakePostFragment extends Fragment implements IGetData{
         thread.isDaemon();
         thread.start();
     }
-
+    /*
+     * submitPost: submit post Object to database
+     * @param None
+     * @turn None
+     */
     public void submitPost()
     {
         CollectionReference dbReference;
@@ -253,10 +276,22 @@ public class MakePostFragment extends Fragment implements IGetData{
             }
         });
     }
+
+    /*
+    * endTask: exit from this fragment
+    * @param None
+    * @turn None
+     */
     public void endTask()
     {
         serviceActivity.endTask(this);
     }
+
+    /*
+    * makeCommentField: make comment field of this post and upload to database
+    * @param None
+    * @turn None
+     */
     public void makeCommentField()
     {
         currentPostCommentField.writerId=mainActivity.assign.id;
@@ -274,7 +309,11 @@ public class MakePostFragment extends Fragment implements IGetData{
             }
         });
     }
-
+    /*
+    * getCategoryListFromDB: get categoryList from db and apply to spinner
+    * @param None
+    * @turn None
+     */
     public void getCategoryListFromDB()
     {
         Query categoryQuery;
@@ -298,8 +337,7 @@ public class MakePostFragment extends Fragment implements IGetData{
         });
     }
 
-    //아이템을 받고 처리하는 part.
-    //id로 Action 구분.
+
     @Override
     public void getData(String id, Object data) {
         if(id.equals("category")){

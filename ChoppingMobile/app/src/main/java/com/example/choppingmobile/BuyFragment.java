@@ -80,6 +80,11 @@ public class BuyFragment extends Fragment {
     TextView costView;
     Button submitBtn;
     int cost;
+    /*
+    * init: initialize object of Class and get Singletone value
+    * @param1: None
+    * @turn: None
+     */
     public void init()
     {
         items=new ArrayList<>();
@@ -87,7 +92,11 @@ public class BuyFragment extends Fragment {
         mainActivity=MainActivity.mainActivity;
         db = serviceActivity.db;
     }
-
+    /*
+    * initWidget: initialize UI Object
+    * @param1: view group --> fragments
+    * @turn: None
+     */
     public void initWidget(ViewGroup vg)
     {
         costView = vg.findViewById(R.id.resultPage_cost);
@@ -108,7 +117,11 @@ public class BuyFragment extends Fragment {
         });
         return vg;
     }
-
+    /*
+    * makeOrder: upload order Object to database
+    * @param: None
+    * @turn: None
+     */
     public void makeOrder()
     {
         Receipt order = new Receipt();
@@ -132,11 +145,22 @@ public class BuyFragment extends Fragment {
                     }
                 });
     }
+
+    /*
+    * appendItems: appeld item to item list
+    * @param: item id
+    * @turn: list size
+     */
     public int appendItems(String id)
     {
         items.add(id);
         return items.size();
     }
+    /*
+    * appendCost: convert String cost to Integer value, and add to
+    * @param: _cost(String) string cost of object
+    * @turn summed cost value
+     */
     public int appendCost(String _cost)
     {
         try {

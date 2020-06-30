@@ -454,7 +454,12 @@ public class OpenMarket extends Fragment {
                     }
                 });
     }
-    //direction true => 정방향, false => 역순
+    /*
+    * composeScreen: compose Screen list view from query Document
+    * @param1: query result
+    * @param2: sorting direction true --> descending, false not
+    * @turn: None
+     */
     public void composeScreen(QuerySnapshot queryDocumentSnapshots, boolean direction)
     {
         int num=0;

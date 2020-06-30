@@ -93,6 +93,11 @@ public class ListAdapter extends BaseAdapter {
         Log.e("glide","glide...");
         Glide.with(context).load(url).into(_imgView);
     }
+    /*
+    * addItem: add item to adapter list
+    * @param Postitem to add
+    * @ turn is success or not
+     */
     public boolean addItem(PostItem item)
     {
         if(item!=null)
@@ -100,6 +105,11 @@ public class ListAdapter extends BaseAdapter {
         notifyDataSetChanged();
         return true;
     }
+    /*
+    * pushItem: add item on top of adapter list
+    * @param PostItem to add
+    * @turn size of list or false
+     */
     public int pushItem(PostItem item)
     {
         int val;
@@ -113,6 +123,12 @@ public class ListAdapter extends BaseAdapter {
         notifyDataSetChanged();
         return val;
     }
+
+    /*
+    * resetItem: reset item list on local
+    * @param None
+    * @turn success or not
+     */
     public int resetItem()
     {
         int val =-1;
