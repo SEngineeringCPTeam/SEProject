@@ -44,11 +44,15 @@ public class ImageAdapter extends PagerAdapter {
         images=bitmaps;
         onBitmap=true;
     }
+    /*
+    * appendBitmap: append bitmap to image  List
+    * @param: Uri image
+    * @turn: None
+     */
     public void appendBitmap(Uri img)
     {
         if(images!=null) {
             images.add(img);
-            Log.e("qwerty",img.toString());
             notifyDataSetChanged();
         }
     }
@@ -80,7 +84,7 @@ public class ImageAdapter extends PagerAdapter {
             imageView.setImageURI(images.get(position));
         else
         {
-            //다운로드 받는 부분.
+            //download image from storage
             serviceActivity.setImageFromGlide(imageView, images.get(position).toString());
         }
         container.addView(v);

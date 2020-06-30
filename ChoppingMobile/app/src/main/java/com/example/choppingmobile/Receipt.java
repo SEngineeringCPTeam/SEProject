@@ -13,6 +13,12 @@ public class Receipt {
     public Timestamp time;
     public long cost;
     public String id;
+
+    /*
+     * toMap: compose Map Class which include Object's data
+     * @param: None
+     * @turn: map_include object data
+     */
     public HashMap<String, Object> toMap()
     {
         HashMap<String, Object> map = new HashMap<>();
@@ -22,6 +28,12 @@ public class Receipt {
         map.put("cost",cost);
         return map;
     }
+
+    /*
+     * fromMap: compose Object from Map class
+     * @param: map_include object data
+     * @return: None
+     */
     public void fromMap(Map<String, Object> map)
     {
         items = (ArrayList<String>)map.get("items");

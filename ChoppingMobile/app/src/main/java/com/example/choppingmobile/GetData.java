@@ -24,7 +24,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
-
+//Not Used Now
 public class GetData extends AppCompatActivity {
 
     FirebaseDatabase mDBinstance=null;
@@ -50,31 +50,6 @@ public class GetData extends AppCompatActivity {
         getBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*
-                getDataTest.startAt("KCS").endAt("KCS\uf8ff").addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                        Map<String, Object> user = new HashMap<>();
-                        for(DataSnapshot ds: dataSnapshot.getChildren())
-                        {
-                            String key = ds.getKey();
-                            Object val = ds.getValue();
-                            user.put(key,val);
-                        }
-                        User Value = new User();
-                        Value.setUser(user);
-                        Log.w("Data",Value.userInfo.address);
-                        if(dataSnapshot==null)
-                            Log.e("Search","null");
-                        else
-                            Log.e("Result",dataSnapshot.toString());
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        Log.w("Database2","Failed to read Value.",databaseError.toException());
-                    }
-                });*/
                 getDataTest.get()
                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                             @Override

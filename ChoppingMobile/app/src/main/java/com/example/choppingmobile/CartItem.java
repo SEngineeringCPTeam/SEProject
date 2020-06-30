@@ -21,7 +21,11 @@ public class CartItem {
         itemName = _n;
         cost = _c;
     }
-
+    /*
+    * fromMap: compose Object from Map class
+    * @param: map_include object data
+    * @return: None
+     */
     public void fromMap(Map<String, Object> map)
     {
         buyer = (String)map.get("buyer");

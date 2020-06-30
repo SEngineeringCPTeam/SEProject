@@ -8,7 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-
+//Not used
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link ServiceMain#newInstance} factory method to

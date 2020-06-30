@@ -40,6 +40,11 @@ public class Info {
         address=(String)data.get("Address");
     }
 
+    /*
+     * fromMap: compose Object from Map class
+     * @param: map_include object data
+     * @return: None
+     */
     public Map<String, Object> toMap()
     {
         HashMap<String, Object> result = new HashMap<>();

@@ -153,6 +153,11 @@ public class ServiceActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    * removeComment: remove comment from database
+    * @param comment which get from database
+    * @turn success or not
+     */
     public boolean removeComment(Comment comment)
     {
         final String commentField = comment.commentId;
@@ -180,7 +185,12 @@ public class ServiceActivity extends AppCompatActivity {
                 });
         return true;
     }
-
+    /*
+    * removeFromCommentList: remove comment From comment List
+    * @param commentfieldid(String)
+    * @param comment key(String)
+    * @turn None
+     */
     public void removeFromCommentList(final String commentId,final String comment)
     {
         Log.e("comment",commentId);
@@ -366,12 +376,25 @@ public class ServiceActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    /*
+    * endTask: end current Fragment end load prev thing
+    * @param fragment instance
+    * @turn None
+     */
     public void endTask(Fragment fragment)
     {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().remove(fragment).commit();
         fragmentManager.popBackStack();
     }
+
+    /*
+    * foundId: foundId From CartItem instance
+    * @param cartitem instance
+    * @param action for cart item
+    * @turn None
+     */
     public void foundId(CartItem item, final String action)
     {
         Log.e("num","num");
@@ -400,6 +423,12 @@ public class ServiceActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    /*
+    * removeCart: remove Item from cary
+    * @param item id
+    * @turn None
+     */
     public void removeCart(String itemID)
     {
         Log.e("id",itemID);

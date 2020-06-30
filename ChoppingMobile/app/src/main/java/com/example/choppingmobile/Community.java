@@ -111,6 +111,11 @@ public class Community extends Fragment {
     ArrayList<String> categoryList;
     String[] builderCategory;
     AlertDialog.Builder builder;
+    /*
+    * init:initialize Community Fragment Objects, Lists
+    * @param viewgroup
+    * @turn None
+     */
     private void init(ViewGroup vg)
     {
         parentActivity=(ServiceActivity) getActivity();
@@ -130,6 +135,12 @@ public class Community extends Fragment {
         builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Category");
     }
+
+    /*
+     * init_widget:initialize Community Fragment UI Object
+     * @param viewgroup
+     * @turn None
+     */
     private void init_widget(ViewGroup vg)
     {
         listView = vg.findViewById(R.id.communityBodyList);
@@ -221,6 +232,11 @@ public class Community extends Fragment {
         });
         return vg;
     }
+    /*
+    * translator: convert input to special form
+    * @param input
+    * @turn converted result
+     */
     public String translator(String input)
     {
         if(input.equals("제목"))
@@ -233,6 +249,12 @@ public class Community extends Fragment {
         }
         return "null";
     }
+
+    /*
+    * getSearchList: get Category List from Database
+    * @param field--> search field, word --> search word, category --> search categroy
+    * @turn None
+     */
     public void getSearchList(String field, String word, boolean category)
     {
          Query query = db.collection("Post")
@@ -301,7 +323,11 @@ public class Community extends Fragment {
                     }
                 });
     }
-
+    /*
+    * getSearchList: get object list which in search option
+    * @param None
+    * @turn None
+     */
     public void getSearchList()
     {
         DocumentReference query = db.collection("Category").document("searchOption");
@@ -322,6 +348,12 @@ public class Community extends Fragment {
             }
         });
     }
+
+    /*
+     * getCategoryList: get Category List from database
+     * @param None
+     * @turn None
+     */
     public void getCategoryList()
     {
         DocumentReference query = db.collection("Category").document("postCategory");
@@ -345,6 +377,12 @@ public class Community extends Fragment {
             }
         });
     }
+
+    /*
+     * setBuilder: set search option builder
+     * @param None
+     * @turn None
+     */
     public void setBuilder()
     {
         if(builderCategory!=null) {
@@ -357,6 +395,12 @@ public class Community extends Fragment {
             });
         }
     }
+
+    /*
+     * UICategory: set UI category
+     * @param current category
+     * @turn None
+     */
     public void UICategory(String category)
     {
         Log.e("category",category);
@@ -366,6 +410,12 @@ public class Community extends Fragment {
         searchEdit.setText("");
         getPost();
     }
+
+    /*
+    * getPost: get Post action by search option
+    * @param None
+    * @turn None
+     */
     public void getPost()
     {
         if(currentCategory.equals("All"))
@@ -377,6 +427,11 @@ public class Community extends Fragment {
             getCategoricalPost();
         }
     }
+    /*
+    * getCategoricalPost: get Data from database which fit in current category
+    * @param None
+    * @turn None
+     */
     public void getCategoricalPost()
     {
         db.collection("Post")
@@ -398,6 +453,11 @@ public class Community extends Fragment {
                     }
                 });
     }
+    /*
+    * getCategoricalPrevList: get data from database which fit in current category and before current first Object
+    * @param None
+    * @turn None
+     */
     public void getCategoricalPrevList()
     {
         postQuery.orderBy("time",Query.Direction.ASCENDING)
@@ -424,6 +484,11 @@ public class Community extends Fragment {
                     }
                 });
     }
+    /*
+    * getPrevList: get data from database which submitted before the current first Object
+    * @param None
+    * @turn None
+     */
     public void getPrevList()
     {
         Log.e("time",firstTimeStamp.toDate().toString());
@@ -450,6 +515,12 @@ public class Community extends Fragment {
                     }
                 });
     }
+
+    /*
+     * getCategoricalNextList: get data from database which fit in current category and after current last Object
+     * @param None
+     * @turn None
+     */
     public void getCategoricalNextList()
     {
         postQuery.orderBy("time",Query.Direction.DESCENDING)
@@ -475,6 +546,12 @@ public class Community extends Fragment {
             }
         });
     }
+
+    /*
+     * getNextList: get data from database which submitted after current last Object
+     * @param None
+     * @turn None
+     */
     public void getNextList()
     {
         Log.e("time",lastTimeStamp.toDate().toString());
@@ -500,6 +577,12 @@ public class Community extends Fragment {
             }
         });
     }
+
+    /*
+     * getPrevList: get data from database which submitted after the current last Object
+     * @param None
+     * @turn None
+     */
     public void getPostList()
     {
         postQuery.orderBy("time", Query.Direction.DESCENDING)
@@ -519,7 +602,12 @@ public class Community extends Fragment {
                 });
     }
 
-    //direction true => 정방향, false => 역순
+    /*
+     * composeScreen: compose Screen list view from query Document
+     * @param query result
+     * @param sorting direction true --> descending, false not
+     * @turn None
+     */
     public void composeScreen(QuerySnapshot queryDocumentSnapshots, boolean direction)
     {
         int num=0;
